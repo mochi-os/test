@@ -14,7 +14,8 @@
 		"attachments.star",
 		"attachments_multiuser.star",
 		"attachments_crossinstance.star",
-		"attachments_url.star"
+		"attachments_url.star",
+		"preferences.star"
 	],
 
 	"database": {
@@ -85,7 +86,18 @@
 		"test_attachment_url_multiuser": {"function": "action_test_attachment_url_multiuser", "public": true},
 		"test_attachment_url_multiuser_verify": {"function": "action_test_attachment_url_multiuser_verify", "public": true},
 		"test_attachment_url_crossinstance": {"function": "action_test_attachment_url_crossinstance", "public": true},
-		"test_attachment_url_crossinstance_verify": {"function": "action_test_attachment_url_crossinstance_verify", "public": true}
+		"test_attachment_url_crossinstance_verify": {"function": "action_test_attachment_url_crossinstance_verify", "public": true},
+		"test_preferences_get_default": {"function": "action_test_preferences_get_default"},
+		"test_preferences_set_get": {"function": "action_test_preferences_set_get"},
+		"test_preferences_update": {"function": "action_test_preferences_update"},
+		"test_preferences_multiple": {"function": "action_test_preferences_multiple"},
+		"test_preferences_all": {"function": "action_test_preferences_all"},
+		"test_preferences_return_value": {"function": "action_test_preferences_return_value"},
+		"test_preferences_special_chars": {"function": "action_test_preferences_special_chars"},
+		"test_preferences_empty_value": {"function": "action_test_preferences_empty_value"},
+		"test_preferences_delete": {"function": "action_test_preferences_delete"},
+		"test_preferences_cleanup": {"function": "action_test_preferences_cleanup"},
+		"test_preferences_suite": {"function": "action_test_preferences_suite"}
 	},
 
 	"events": {
