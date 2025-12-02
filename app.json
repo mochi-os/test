@@ -26,7 +26,7 @@
 
 	"actions": {
 		"": {"function": "action_index"},
-		"files": {"attachments": true},
+		"attachments": {"attachments": true},
 		"send": {"function": "action_send"},
 		"status": {"function": "action_status"},
 		"ping": {"function": "action_ping", "public": true},
