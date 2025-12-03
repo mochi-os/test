@@ -17,7 +17,8 @@
 		"attachments_url.star",
 		"preferences.star",
 		"settings.star",
-		"users.star"
+		"users.star",
+		"domains.star"
 	],
 
 	"database": {
@@ -129,7 +130,18 @@
 		"test_users_get_identity_not_found": {"function": "action_test_users_get_identity_not_found"},
 		"test_users_get_fingerprint": {"function": "action_test_users_get_fingerprint"},
 		"test_users_get_fingerprint_with_hyphens": {"function": "action_test_users_get_fingerprint_with_hyphens"},
-		"test_users_get_fingerprint_not_found": {"function": "action_test_users_get_fingerprint_not_found"}
+		"test_users_get_fingerprint_not_found": {"function": "action_test_users_get_fingerprint_not_found"},
+		"test_domains_register": {"function": "action_test_domains_register"},
+		"test_domains_get": {"function": "action_test_domains_get"},
+		"test_domains_list": {"function": "action_test_domains_list"},
+		"test_domains_update": {"function": "action_test_domains_update"},
+		"test_domains_delete": {"function": "action_test_domains_delete"},
+		"test_domains_lookup": {"function": "action_test_domains_lookup"},
+		"test_domains_route_crud": {"function": "action_test_domains_route_crud"},
+		"test_domains_cascade_delete": {"function": "action_test_domains_cascade_delete"},
+		"test_domains_delegation_full": {"function": "action_test_domains_delegation_full"},
+		"test_domains_delegate_path_scope": {"function": "action_test_domains_delegate_path_scope"},
+		"test_domains_suite": {"function": "action_test_domains_suite"}
 	},
 
 	"events": {
