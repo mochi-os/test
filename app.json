@@ -15,7 +15,9 @@
 		"attachments_multiuser.star",
 		"attachments_crossinstance.star",
 		"attachments_url.star",
-		"preferences.star"
+		"preferences.star",
+		"settings.star",
+		"users.star"
 	],
 
 	"database": {
@@ -97,7 +99,37 @@
 		"test_preferences_empty_value": {"function": "action_test_preferences_empty_value"},
 		"test_preferences_delete": {"function": "action_test_preferences_delete"},
 		"test_preferences_cleanup": {"function": "action_test_preferences_cleanup"},
-		"test_preferences_suite": {"function": "action_test_preferences_suite"}
+		"test_preferences_suite": {"function": "action_test_preferences_suite"},
+		"test_settings_get_user_readable": {"function": "action_test_settings_get_user_readable"},
+		"test_settings_get_unknown": {"function": "action_test_settings_get_unknown"},
+		"test_settings_set_admin": {"function": "action_test_settings_set_admin"},
+		"test_settings_set_validation": {"function": "action_test_settings_set_validation"},
+		"test_settings_set_readonly": {"function": "action_test_settings_set_readonly"},
+		"test_settings_list_admin": {"function": "action_test_settings_list_admin"},
+		"test_settings_maintenance_message": {"function": "action_test_settings_maintenance_message"},
+		"test_settings_suite": {"function": "action_test_settings_suite"},
+		"test_users_get_id": {"function": "action_test_users_get_id"},
+		"test_users_get_id_not_found": {"function": "action_test_users_get_id_not_found"},
+		"test_users_get_username": {"function": "action_test_users_get_username"},
+		"test_users_get_username_not_found": {"function": "action_test_users_get_username_not_found"},
+		"test_users_list": {"function": "action_test_users_list"},
+		"test_users_list_pagination": {"function": "action_test_users_list_pagination"},
+		"test_users_count": {"function": "action_test_users_count"},
+		"test_users_create_update_delete": {"function": "action_test_users_create_update_delete"},
+		"test_users_create_with_role": {"function": "action_test_users_create_with_role"},
+		"test_users_create_duplicate": {"function": "action_test_users_create_duplicate"},
+		"test_users_delete_self": {"function": "action_test_users_delete_self"},
+		"test_users_invite_create": {"function": "action_test_users_invite_create"},
+		"test_users_invite_create_custom": {"function": "action_test_users_invite_create_custom"},
+		"test_users_invite_list": {"function": "action_test_users_invite_list"},
+		"test_users_invite_delete": {"function": "action_test_users_invite_delete"},
+		"test_users_invite_validate": {"function": "action_test_users_invite_validate", "public": true},
+		"test_users_suite": {"function": "action_test_users_suite"},
+		"test_users_get_identity": {"function": "action_test_users_get_identity"},
+		"test_users_get_identity_not_found": {"function": "action_test_users_get_identity_not_found"},
+		"test_users_get_fingerprint": {"function": "action_test_users_get_fingerprint"},
+		"test_users_get_fingerprint_with_hyphens": {"function": "action_test_users_get_fingerprint_with_hyphens"},
+		"test_users_get_fingerprint_not_found": {"function": "action_test_users_get_fingerprint_not_found"}
 	},
 
 	"events": {
