@@ -401,8 +401,8 @@ def action_test_domains_route_context(a):
     a.json({"test": "domains_route_context", "status": "PASS"})
 
 def action_test_domains_action_context(a):
-    """Return the current a.context value for verification"""
-    a.json({"context": a.context})
+    """Return the current a.domain.route values for verification"""
+    a.json({"context": a.domain.route.context, "remainder": a.domain.route.remainder})
 
 def action_test_domains_suite(a):
     """Run all domain tests"""
