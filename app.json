@@ -1,8 +1,8 @@
 {
 	"version": "1.0",
 	"label": "app_name",
-	"paths": ["claude-test"],
-	"services": ["claude-test"],
+	"paths": ["test"],
+	"services": ["test"],
 
 	"architecture": {"engine": "starlark", "version": 2},
 	"execute": [
@@ -22,7 +22,7 @@
 	],
 
 	"database": {
-		"file": "claude-test.db",
+		"file": "test.db",
 		"schema": 2,
 		"create": {"function": "database_create"},
 		"helpers": ["access", "attachments"]
@@ -141,6 +141,8 @@
 		"test_domains_cascade_delete": {"function": "action_test_domains_cascade_delete"},
 		"test_domains_delegation_full": {"function": "action_test_domains_delegation_full"},
 		"test_domains_delegate_path_scope": {"function": "action_test_domains_delegate_path_scope"},
+		"test_domains_route_context": {"function": "action_test_domains_route_context"},
+		"test_domains_action_context": {"function": "action_test_domains_action_context", "public": true},
 		"test_domains_suite": {"function": "action_test_domains_suite"}
 	},
 

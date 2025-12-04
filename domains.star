@@ -366,6 +366,44 @@ def action_test_domains_delegate_path_scope(a):
 
     a.json({"test": "domains_delegate_path_scope", "status": "PASS"})
 
+def action_test_domains_route_context(a):
+    """Test route context field"""
+    # Clean up and create domain
+    mochi.domain.delete("test-context.example.com")
+    mochi.domain.register("test-context.example.com")
+
+    # Create route with context
+    r = mochi.domain.route.create("test-context.example.com", "/mypath", "entity123", 0, context="my-custom-context")
+
+    if r == None:
+        a.error(500, "route creation returned None")
+        return
+
+    if r["context"] != "my-custom-context":
+        a.error(500, "route context mismatch: " + str(r["context"]))
+        return
+
+    # Get route and verify context
+    r = mochi.domain.route.get("test-context.example.com", "/mypath")
+    if r["context"] != "my-custom-context":
+        a.error(500, "route get context mismatch: " + str(r["context"]))
+        return
+
+    # Update context
+    r = mochi.domain.route.update("test-context.example.com", "/mypath", context="updated-context")
+    if r["context"] != "updated-context":
+        a.error(500, "route update context mismatch: " + str(r["context"]))
+        return
+
+    # Clean up
+    mochi.domain.delete("test-context.example.com")
+
+    a.json({"test": "domains_route_context", "status": "PASS"})
+
+def action_test_domains_action_context(a):
+    """Return the current a.context value for verification"""
+    a.json({"context": a.context})
+
 def action_test_domains_suite(a):
     """Run all domain tests"""
     tests = [
@@ -376,6 +414,7 @@ def action_test_domains_suite(a):
         "test_domains_delete",
         "test_domains_lookup",
         "test_domains_route_crud",
+        "test_domains_route_context",
         "test_domains_cascade_delete",
         "test_domains_delegation_full",
         "test_domains_delegate_path_scope"
