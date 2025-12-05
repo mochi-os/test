@@ -148,7 +148,10 @@
 		"test_domains_delegate_path_scope": {"function": "action_test_domains_delegate_path_scope"},
 		"test_domains_route_context": {"function": "action_test_domains_route_context"},
 		"test_domains_action_context": {"function": "action_test_domains_action_context", "public": true},
-		"test_domains_suite": {"function": "action_test_domains_suite"}
+		"test_domains_suite": {"function": "action_test_domains_suite"},
+		"test_cookie_set": {"function": "action_test_cookie_set", "public": true},
+		"test_cookie_get": {"function": "action_test_cookie_get", "public": true},
+		"test_cookie_unset": {"function": "action_test_cookie_unset", "public": true}
 	},
 
 	"events": {

@@ -203,3 +203,25 @@ def action_test_p2p_rate_limit(a):
         "limit": 20,
         "window_seconds": 1
     })
+
+# Cookie tests
+
+def action_test_cookie_set(a):
+    """Test setting a cookie"""
+    name = a.input("name", "test_cookie")
+    value = a.input("value", "test_value")
+    a.cookie.set(name, value)
+    a.json({"test": "cookie_set", "status": "ok", "name": name, "value": value})
+
+def action_test_cookie_get(a):
+    """Test getting a cookie"""
+    name = a.input("name", "test_cookie")
+    default = a.input("default", "")
+    value = a.cookie.get(name, default)
+    a.json({"test": "cookie_get", "status": "ok", "name": name, "value": value})
+
+def action_test_cookie_unset(a):
+    """Test unsetting a cookie"""
+    name = a.input("name", "test_cookie")
+    a.cookie.unset(name)
+    a.json({"test": "cookie_unset", "status": "ok", "name": name})
