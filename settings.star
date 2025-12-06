@@ -2,16 +2,41 @@
 # Tests for mochi.setting.get(), set(), list()
 # Note: set() and list() require administrator role
 
+def action_test_settings_get_public(a):
+    """Test getting public settings (no auth required)"""
+    # signup_enabled is public
+    result = mochi.setting.get("signup_enabled")
+    if result == None:
+        a.json({"test": "settings_get_public", "status": "FAIL", "error": "signup_enabled returned None"})
+        return
+    if result != "true" and result != "false":
+        a.json({"test": "settings_get_public", "status": "FAIL", "error": "signup_enabled unexpected value: " + result})
+        return
+
+    # apps_install_user is also public
+    result = mochi.setting.get("apps_install_user")
+    if result == None:
+        a.json({"test": "settings_get_public", "status": "FAIL", "error": "apps_install_user returned None"})
+        return
+    if result != "true" and result != "false":
+        a.json({"test": "settings_get_public", "status": "FAIL", "error": "apps_install_user unexpected value: " + result})
+        return
+
+    a.json({"test": "settings_get_public", "status": "PASS"})
+
 def action_test_settings_get_user_readable(a):
-    """Test getting user-readable settings (server_version, site_maintenance_message, etc.)"""
+    """Test getting user-readable settings (server_version, server_started, etc.)"""
     # server_version should be readable by any user
     result = mochi.setting.get("server_version")
     if result == None or result == "":
         a.json({"test": "settings_get_user_readable", "status": "FAIL", "error": "server_version returned empty"})
         return
 
-    # site_maintenance_message should also be readable (empty string is valid default)
-    result = mochi.setting.get("site_maintenance_message")
+    # apps_install_user should also be readable
+    result = mochi.setting.get("apps_install_user")
+    if result == None:
+        a.json({"test": "settings_get_user_readable", "status": "FAIL", "error": "apps_install_user returned None"})
+        return
 
     a.json({"test": "settings_get_user_readable", "status": "PASS", "server_version": mochi.setting.get("server_version")})
 
@@ -28,20 +53,23 @@ def action_test_settings_set_admin(a):
         a.json({"test": "settings_set_admin", "status": "SKIP", "reason": "Requires administrator role"})
         return
 
-    # Set site_maintenance_message
-    result = mochi.setting.set("site_maintenance_message", "Test maintenance")
+    # Get original value
+    orig = mochi.setting.get("apps_install_user")
+
+    # Set apps_install_user
+    result = mochi.setting.set("apps_install_user", "false")
     if result != True:
         a.json({"test": "settings_set_admin", "status": "FAIL", "error": "set() did not return True"})
         return
 
     # Verify it was set
-    value = mochi.setting.get("site_maintenance_message")
-    if value != "Test maintenance":
+    value = mochi.setting.get("apps_install_user")
+    if value != "false":
         a.json({"test": "settings_set_admin", "status": "FAIL", "error": "Value not persisted, got: " + str(value)})
         return
 
-    # Reset to default
-    mochi.setting.set("site_maintenance_message", "")
+    # Restore original
+    mochi.setting.set("apps_install_user", orig if orig else "true")
 
     a.json({"test": "settings_set_admin", "status": "PASS"})
 
@@ -79,55 +107,36 @@ def action_test_settings_list_admin(a):
         a.json({"test": "settings_list_admin", "status": "FAIL", "error": "Expected tuple, got: " + type(settings)})
         return
 
-    if len(settings) < 4:
-        a.json({"test": "settings_list_admin", "status": "FAIL", "error": "Expected at least 4 settings, got: " + str(len(settings))})
+    if len(settings) < 6:
+        a.json({"test": "settings_list_admin", "status": "FAIL", "error": "Expected at least 6 settings, got: " + str(len(settings))})
         return
 
-    # Check that each setting has required fields
-    required_fields = ["name", "value", "default", "description", "pattern", "user_readable", "read_only"]
+    # Check that each setting has required fields including new 'public' field
+    required_fields = ["name", "value", "default", "description", "pattern", "user_readable", "read_only", "public"]
     for s in settings:
         for field in required_fields:
             if field not in s:
                 a.json({"test": "settings_list_admin", "status": "FAIL", "error": "Setting missing field: " + field})
                 return
 
-    # Find site_maintenance_message in the list
+    # Find apps_install_user in the list
     found = False
     for s in settings:
-        if s["name"] == "site_maintenance_message":
+        if s["name"] == "apps_install_user":
             found = True
             if s["user_readable"] != True:
-                a.json({"test": "settings_list_admin", "status": "FAIL", "error": "site_maintenance_message should be user_readable"})
+                a.json({"test": "settings_list_admin", "status": "FAIL", "error": "apps_install_user should be user_readable"})
+                return
+            if s["public"] != True:
+                a.json({"test": "settings_list_admin", "status": "FAIL", "error": "apps_install_user should be public"})
                 return
             break
 
     if not found:
-        a.json({"test": "settings_list_admin", "status": "FAIL", "error": "site_maintenance_message not found in list"})
+        a.json({"test": "settings_list_admin", "status": "FAIL", "error": "apps_install_user not found in list"})
         return
 
     a.json({"test": "settings_list_admin", "status": "PASS", "count": len(settings)})
-
-def action_test_settings_maintenance_message(a):
-    """Test maintenance message setting"""
-    if a.user.role != "administrator":
-        a.json({"test": "settings_maintenance_message", "status": "SKIP", "reason": "Requires administrator role"})
-        return
-
-    # Set maintenance message
-    mochi.setting.set("site_maintenance_message", "Down for updates")
-    value = mochi.setting.get("site_maintenance_message")
-    if value != "Down for updates":
-        a.json({"test": "settings_maintenance_message", "status": "FAIL", "error": "Message not set correctly"})
-        return
-
-    # Clear maintenance (empty string)
-    mochi.setting.set("site_maintenance_message", "")
-    value = mochi.setting.get("site_maintenance_message")
-    if value != "":
-        a.json({"test": "settings_maintenance_message", "status": "FAIL", "error": "Message not cleared"})
-        return
-
-    a.json({"test": "settings_maintenance_message", "status": "PASS"})
 
 def action_test_settings_get_not_user_readable(a):
     """Test that non-admin users cannot read non-user-readable settings"""
@@ -135,7 +144,7 @@ def action_test_settings_get_not_user_readable(a):
         a.json({"test": "settings_get_not_user_readable", "status": "SKIP", "reason": "Test requires non-administrator"})
         return
 
-    # email_from is not user-readable - this should fail
+    # email_from is not user-readable and not public - this should fail
     result = mochi.setting.get("email_from")
     # If we get here, access control failed
     a.json({"test": "settings_get_not_user_readable", "status": "FAIL", "error": "Non-admin should not be able to read email_from"})
@@ -147,7 +156,7 @@ def action_test_settings_set_non_admin(a):
         return
 
     # Try to set a modifiable setting - should fail for non-admin
-    result = mochi.setting.set("site_maintenance_message", "hacked")
+    result = mochi.setting.set("apps_install_user", "false")
     # If we get here, access control failed
     a.json({"test": "settings_set_non_admin", "status": "FAIL", "error": "Non-admin should not be able to set settings"})
 
@@ -183,7 +192,7 @@ def action_test_settings_get_admin_all(a):
     a.json({"test": "settings_get_admin_all", "status": "PASS"})
 
 def action_test_settings_new_settings(a):
-    """Test the newly added settings: email_from, domains_registration, domains_verification"""
+    """Test the newly added settings: email_from, domains_registration, domains_verification, apps_install_user"""
     if a.user.role != "administrator":
         a.json({"test": "settings_new_settings", "status": "SKIP", "reason": "Requires administrator role"})
         return
@@ -216,6 +225,17 @@ def action_test_settings_new_settings(a):
     if orig:
         mochi.setting.set("domains_registration", orig)
 
+    # Test apps_install_user - boolean setting
+    orig = mochi.setting.get("apps_install_user")
+    mochi.setting.set("apps_install_user", "true")
+    if mochi.setting.get("apps_install_user") != "true":
+        errors.append("apps_install_user set to true failed")
+    mochi.setting.set("apps_install_user", "false")
+    if mochi.setting.get("apps_install_user") != "false":
+        errors.append("apps_install_user set to false failed")
+    # Restore original
+    mochi.setting.set("apps_install_user", orig if orig else "true")
+
     if errors:
         a.json({"test": "settings_new_settings", "status": "FAIL", "errors": errors})
     else:
@@ -230,24 +250,27 @@ def action_test_settings_suite(a):
     result = mochi.setting.get("server_version")
     results.append({"test": "get_user_readable", "pass": result != None and result != ""})
 
-    # Test 2: Get site_maintenance_message (user-readable, defaults to empty)
-    result = mochi.setting.get("site_maintenance_message")
-    results.append({"test": "get_maintenance_message", "pass": True})  # Empty string is valid
+    # Test 2: Get public setting (signup_enabled)
+    result = mochi.setting.get("signup_enabled")
+    results.append({"test": "get_public", "pass": result == "true" or result == "false"})
+
+    # Test 3: Get apps_install_user (public and user_readable)
+    result = mochi.setting.get("apps_install_user")
+    results.append({"test": "get_apps_install_user", "pass": result == "true" or result == "false"})
 
     if is_admin:
-        # Test 3: Set and get
-        mochi.setting.set("site_maintenance_message", "Test description")
-        result = mochi.setting.get("site_maintenance_message")
-        results.append({"test": "set_get", "pass": result == "Test description"})
+        # Test 4: Set and get
+        orig = mochi.setting.get("apps_install_user")
+        mochi.setting.set("apps_install_user", "false")
+        result = mochi.setting.get("apps_install_user")
+        results.append({"test": "set_get", "pass": result == "false"})
+        mochi.setting.set("apps_install_user", orig if orig else "true")
 
-        # Reset
-        mochi.setting.set("site_maintenance_message", "")
-
-        # Test 4: List settings
+        # Test 5: List settings
         settings = mochi.setting.list()
-        results.append({"test": "list", "pass": type(settings) == "tuple" and len(settings) >= 4})
+        results.append({"test": "list", "pass": type(settings) == "tuple" and len(settings) >= 6})
 
-        # Test 5: Boolean setting
+        # Test 6: Boolean setting
         mochi.setting.set("signup_enabled", "false")
         result = mochi.setting.get("signup_enabled")
         results.append({"test": "boolean_setting", "pass": result == "false"})
