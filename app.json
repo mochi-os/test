@@ -27,8 +27,7 @@
 	"database": {
 		"file": "test.db",
 		"schema": 2,
-		"create": {"function": "database_create"},
-		"helpers": ["access", "attachments"]
+		"create": {"function": "database_create"}
 	},
 
 	"actions": {
