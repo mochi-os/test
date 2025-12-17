@@ -3,7 +3,7 @@
 
 def database_create():
     """Create test database schema"""
-    mochi.db.query("create table test ( id text primary key, value text )")
+    mochi.db.execute("create table test ( id text primary key, value text )")
 
 def action_index(a):
     """Show test app status and controls"""
@@ -135,13 +135,13 @@ def action_test_broadcast(a):
 def action_test_attach(a):
     """Test that ATTACH is blocked - should fail with authorization error"""
     # This should fail with an authorization error if the security is working
-    result = mochi.db.query("ATTACH DATABASE '../../../db/users.db' AS users_db")
+    result = mochi.db.execute("ATTACH DATABASE '../../../db/users.db' AS users_db")
     a.json({"blocked": False, "result": result, "error": "ATTACH was NOT blocked - SECURITY VULNERABILITY!"})
 
 def action_test_detach(a):
     """Test that DETACH is blocked - should fail with authorization error"""
     # This should fail with an authorization error if the security is working
-    result = mochi.db.query("DETACH DATABASE main")
+    result = mochi.db.execute("DETACH DATABASE main")
     a.json({"blocked": False, "result": result, "error": "DETACH was NOT blocked - SECURITY VULNERABILITY!"})
 
 def action_test_storage_limit(a):
@@ -173,24 +173,24 @@ def action_test_db_limit(a):
     """Test database storage limit by inserting data until full.
     Inserts 4KB rows. With 1GB limit (~262144 pages of 4KB), should fail around 250k rows."""
     # Create test table if not exists
-    mochi.db.query("CREATE TABLE IF NOT EXISTS db_limit_test (id INTEGER PRIMARY KEY, data TEXT)")
+    mochi.db.execute("CREATE TABLE IF NOT EXISTS db_limit_test (id INTEGER PRIMARY KEY, data TEXT)")
 
     # Insert 4KB rows until database is full
     chunk = "X" * 4096
 
     # Insert 300k rows (~1.2GB) - should fail before completing if limit works
     for i in range(300000):
-        mochi.db.query("INSERT INTO db_limit_test (data) VALUES (?)", chunk)
+        mochi.db.execute("INSERT INTO db_limit_test (data) VALUES (?)", chunk)
         if i % 10000 == 0:
             print("Inserted", i, "rows...")
 
     # If we get here, the limit didn't work
-    rows = mochi.db.query("SELECT COUNT(*) as count FROM db_limit_test")
+    rows = mochi.db.rows("SELECT COUNT(*) as count FROM db_limit_test")
     a.json({"test": "db_limit", "status": "FAIL", "rows": rows[0]["count"], "error": "Inserted 300k rows without hitting limit!"})
 
 def action_test_db_cleanup(a):
     """Clean up database test table"""
-    mochi.db.query("DROP TABLE IF EXISTS db_limit_test")
+    mochi.db.execute("DROP TABLE IF EXISTS db_limit_test")
     a.json({"cleaned": True})
 
 def action_test_p2p_rate_limit(a):
