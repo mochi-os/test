@@ -57,7 +57,7 @@ def action_test_attachment_url_single(a):
 
     # Test 6: Verify list also returns url fields
     attachments = mochi.attachment.list(object_id)
-    urls_present = all("url" in a for a in attachments)
+    urls_present = len([a for a in attachments if "url" in a]) == len(attachments)
     if urls_present:
         results.append({"test": "list_has_urls", "passed": True})
     else:

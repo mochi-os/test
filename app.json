@@ -21,7 +21,8 @@
 		"preferences.star",
 		"settings.star",
 		"users.star",
-		"domains.star"
+		"domains.star",
+		"appfiles.star"
 	],
 
 	"database": {
@@ -153,12 +154,41 @@
 		"test_domains_suite": {"function": "action_test_domains_suite"},
 		"test_cookie_set": {"function": "action_test_cookie_set", "public": true},
 		"test_cookie_get": {"function": "action_test_cookie_get", "public": true},
-		"test_cookie_unset": {"function": "action_test_cookie_unset", "public": true}
+		"test_cookie_unset": {"function": "action_test_cookie_unset", "public": true},
+		"test_appfile_exists_found": {"function": "action_test_appfile_exists_found", "public": true},
+		"test_appfile_exists_not_found": {"function": "action_test_appfile_exists_not_found", "public": true},
+		"test_appfile_exists_directory": {"function": "action_test_appfile_exists_directory", "public": true},
+		"test_appfile_exists_nested": {"function": "action_test_appfile_exists_nested", "public": true},
+		"test_appfile_exists_traversal": {"function": "action_test_appfile_exists_traversal", "public": true},
+		"test_appfile_exists_dotfile": {"function": "action_test_appfile_exists_dotfile", "public": true},
+		"test_appfile_list_directory": {"function": "action_test_appfile_list_directory", "public": true},
+		"test_appfile_list_subdirectory": {"function": "action_test_appfile_list_subdirectory", "public": true},
+		"test_appfile_list_missing": {"function": "action_test_appfile_list_missing", "public": true},
+		"test_appfile_list_file": {"function": "action_test_appfile_list_file", "public": true},
+		"test_appfile_list_traversal": {"function": "action_test_appfile_list_traversal", "public": true},
+		"test_appfile_read_text": {"function": "action_test_appfile_read_text", "public": true},
+		"test_appfile_read_json": {"function": "action_test_appfile_read_json", "public": true},
+		"test_appfile_read_nested": {"function": "action_test_appfile_read_nested", "public": true},
+		"test_appfile_read_appjson": {"function": "action_test_appfile_read_appjson", "public": true},
+		"test_appfile_read_missing": {"function": "action_test_appfile_read_missing", "public": true},
+		"test_appfile_read_traversal": {"function": "action_test_appfile_read_traversal", "public": true},
+		"test_write_from_app_text": {"function": "action_test_write_from_app_text", "public": true},
+		"test_write_from_app_json": {"function": "action_test_write_from_app_json", "public": true},
+		"test_write_from_app_nested": {"function": "action_test_write_from_app_nested", "public": true},
+		"test_write_from_app_custom_content_type": {"function": "action_test_write_from_app_custom_content_type", "public": true},
+		"test_write_from_app_missing": {"function": "action_test_write_from_app_missing", "public": true},
+		"test_write_from_app_traversal": {"function": "action_test_write_from_app_traversal", "public": true},
+		"test_appfile_exists_suite": {"function": "action_test_appfile_exists_suite", "public": true},
+		"test_appfile_list_suite": {"function": "action_test_appfile_list_suite", "public": true},
+		"test_appfile_read_suite": {"function": "action_test_appfile_read_suite", "public": true},
+		"test_appfile_suite": {"function": "action_test_appfile_suite", "public": true},
+		"test_appfile_p2p_stream": {"function": "action_test_appfile_p2p_stream"}
 	},
 
 	"events": {
 		"ping": {"function": "event_ping"},
 		"pong": {"function": "event_pong"},
-		"broadcast": {"function": "event_broadcast"}
+		"broadcast": {"function": "event_broadcast"},
+		"appfile_stream": {"function": "event_appfile_stream"}
 	}
 }
