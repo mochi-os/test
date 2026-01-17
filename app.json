@@ -4,6 +4,7 @@
 {
 	"version": "1.0",
 	"label": "app_name",
+	"classes": ["test"],
 	"paths": ["test"],
 	"services": ["test"],
 
@@ -22,7 +23,8 @@
 		"settings.star",
 		"users.star",
 		"domains.star",
-		"appfiles.star"
+		"appfiles.star",
+		"entities.star"
 	],
 
 	"database": {
@@ -182,7 +184,16 @@
 		"test_appfile_list_suite": {"function": "action_test_appfile_list_suite", "public": true},
 		"test_appfile_read_suite": {"function": "action_test_appfile_read_suite", "public": true},
 		"test_appfile_suite": {"function": "action_test_appfile_suite", "public": true},
-		"test_appfile_p2p_stream": {"function": "action_test_appfile_p2p_stream"}
+		"test_appfile_p2p_stream": {"function": "action_test_appfile_p2p_stream"},
+		"test_entity_update_name": {"function": "action_test_entity_update_name"},
+		"test_entity_update_data": {"function": "action_test_entity_update_data"},
+		"test_entity_update_privacy": {"function": "action_test_entity_update_privacy"},
+		"test_entity_update_multiple": {"function": "action_test_entity_update_multiple"},
+		"test_entity_update_invalid": {"function": "action_test_entity_update_invalid"},
+		"test_entity_update_suite": {"function": "action_test_entity_update_suite"},
+		"test_account_add_kwargs": {"function": "action_test_account_add_kwargs"},
+		"test_account_update_kwargs": {"function": "action_test_account_update_kwargs"},
+		"test_account_suite": {"function": "action_test_account_suite"}
 	},
 
 	"events": {
