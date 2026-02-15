@@ -8,7 +8,7 @@
 	"paths": ["test"],
 	"services": ["test"],
 
-	"architecture": {"engine": "starlark", "version": 2},
+	"architecture": {"engine": "starlark", "version": 4},
 	"execute": [
 		"core.star",
 		"groups.star",
