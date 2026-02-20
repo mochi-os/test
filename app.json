@@ -24,7 +24,8 @@
 		"users.star",
 		"domains.star",
 		"appfiles.star",
-		"entities.star"
+		"entities.star",
+		"stage5.star"
 	],
 
 	"database": {
@@ -193,7 +194,15 @@
 		"test_entity_update_suite": {"function": "action_test_entity_update_suite"},
 		"test_account_add_kwargs": {"function": "action_test_account_add_kwargs"},
 		"test_account_update_kwargs": {"function": "action_test_account_update_kwargs"},
-		"test_account_suite": {"function": "action_test_account_suite"}
+		"test_account_suite": {"function": "action_test_account_suite"},
+		"test_qid_lookup_single": {"function": "action_test_qid_lookup_single"},
+		"test_qid_lookup_batch": {"function": "action_test_qid_lookup_batch"},
+		"test_qid_lookup_japanese": {"function": "action_test_qid_lookup_japanese"},
+		"test_qid_lookup_invalid": {"function": "action_test_qid_lookup_invalid"},
+		"test_qid_search": {"function": "action_test_qid_search"},
+		"test_ai_prompt": {"function": "action_test_ai_prompt"},
+		"test_ai_prompt_no_account": {"function": "action_test_ai_prompt_no_account"},
+		"test_stage5_suite": {"function": "action_test_stage5_suite"}
 	},
 
 	"events": {
