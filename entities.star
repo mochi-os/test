@@ -287,10 +287,138 @@ def action_test_account_update_kwargs(a):
 
     a.json({"test": "account_update_kwargs", "passed": passed, "results": results})
 
+def action_test_account_default_set(a):
+    """Test setting an account as the default AI account"""
+    results = []
+    passed = True
+
+    # Create a claude account
+    result = mochi.account.add("claude", api_key="test-key-123")
+    if not result or not result.get("id"):
+        a.json({"test": "account_default_set", "passed": False, "error": "Failed to create account"})
+        return
+
+    account_id = result["id"]
+
+    # Set as default AI account
+    update_result = mochi.account.update(account_id, default="ai")
+    if update_result:
+        results.append({"test": "update_default_ai", "passed": True})
+    else:
+        results.append({"test": "update_default_ai", "passed": False})
+        passed = False
+
+    # Verify default is set
+    account = mochi.account.get(account_id)
+    if account and account.get("default") == "ai":
+        results.append({"test": "default_is_ai", "passed": True})
+    else:
+        results.append({"test": "default_is_ai", "passed": False, "got": account})
+        passed = False
+
+    # Cleanup
+    mochi.account.remove(account_id)
+
+    a.json({"test": "account_default_set", "passed": passed, "results": results})
+
+def action_test_account_default_exclusive(a):
+    """Test that setting a new default clears the old one"""
+    results = []
+    passed = True
+
+    # Create account A
+    result_a = mochi.account.add("claude", api_key="test-key-a")
+    if not result_a or not result_a.get("id"):
+        a.json({"test": "account_default_exclusive", "passed": False, "error": "Failed to create account A"})
+        return
+    id_a = result_a["id"]
+
+    # Create account B
+    result_b = mochi.account.add("claude", api_key="test-key-b")
+    if not result_b or not result_b.get("id"):
+        mochi.account.remove(id_a)
+        a.json({"test": "account_default_exclusive", "passed": False, "error": "Failed to create account B"})
+        return
+    id_b = result_b["id"]
+
+    # Set A as default
+    mochi.account.update(id_a, default="ai")
+
+    # Verify A is default
+    account_a = mochi.account.get(id_a)
+    if account_a and account_a.get("default") == "ai":
+        results.append({"test": "a_is_default", "passed": True})
+    else:
+        results.append({"test": "a_is_default", "passed": False, "got": account_a})
+        passed = False
+
+    # Set B as default — should clear A
+    mochi.account.update(id_b, default="ai")
+
+    # Verify A is no longer default
+    account_a = mochi.account.get(id_a)
+    if account_a and account_a.get("default") == "":
+        results.append({"test": "a_cleared", "passed": True})
+    else:
+        results.append({"test": "a_cleared", "passed": False, "got": account_a})
+        passed = False
+
+    # Verify B is now default
+    account_b = mochi.account.get(id_b)
+    if account_b and account_b.get("default") == "ai":
+        results.append({"test": "b_is_default", "passed": True})
+    else:
+        results.append({"test": "b_is_default", "passed": False, "got": account_b})
+        passed = False
+
+    # Cleanup
+    mochi.account.remove(id_a)
+    mochi.account.remove(id_b)
+
+    a.json({"test": "account_default_exclusive", "passed": passed, "results": results})
+
+def action_test_account_default_clear(a):
+    """Test clearing the default"""
+    results = []
+    passed = True
+
+    # Create account and set as default
+    result = mochi.account.add("claude", api_key="test-key-clear")
+    if not result or not result.get("id"):
+        a.json({"test": "account_default_clear", "passed": False, "error": "Failed to create account"})
+        return
+    account_id = result["id"]
+
+    mochi.account.update(account_id, default="ai")
+
+    # Verify it's set
+    account = mochi.account.get(account_id)
+    if account and account.get("default") == "ai":
+        results.append({"test": "default_set", "passed": True})
+    else:
+        results.append({"test": "default_set", "passed": False, "got": account})
+        passed = False
+
+    # Clear the default
+    mochi.account.update(account_id, default="")
+
+    # Verify it's cleared
+    account = mochi.account.get(account_id)
+    if account and account.get("default") == "":
+        results.append({"test": "default_cleared", "passed": True})
+    else:
+        results.append({"test": "default_cleared", "passed": False, "got": account})
+        passed = False
+
+    # Cleanup
+    mochi.account.remove(account_id)
+
+    a.json({"test": "account_default_clear", "passed": passed, "results": results})
+
 def action_test_account_suite(a):
     """Run all account tests"""
     a.json({
         "test": "account_suite",
-        "note": "Run individual tests: test_account_add_kwargs, test_account_update_kwargs",
-        "tests": ["account_add_kwargs", "account_update_kwargs"]
+        "note": "Run individual tests: test_account_add_kwargs, test_account_update_kwargs, test_account_default_set, test_account_default_exclusive, test_account_default_clear",
+        "tests": ["account_add_kwargs", "account_update_kwargs", "account_default_set", "account_default_exclusive", "account_default_clear"]
     })
