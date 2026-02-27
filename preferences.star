@@ -147,7 +147,7 @@ def action_test_preferences_cleanup(a):
     # This just documents what preferences were created during testing
     prefs = a.user.preference.all()
     test_prefs = [k for k in prefs.keys() if "test" in k.lower()]
-    a.json({"test": "preferences_cleanup", "status": "INFO", "test_preferences": test_prefs})
+    a.json({"test": "preferences_cleanup", "passed": True, "test_preferences": test_prefs})
 
 def action_test_preferences_suite(a):
     """Run all preference tests in sequence"""

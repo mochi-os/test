@@ -196,7 +196,7 @@ def action_test_domains_route_crud(a):
     mochi.domain.register("test-routes.example.com")
 
     # Create route
-    r = mochi.domain.route.create("test-routes.example.com", "/blog", "entity123", 10)
+    r = mochi.domain.route.create("test-routes.example.com", "/blog", "app", "entity123", 10)
 
     if r == None:
         a.error(500, "route creation returned None")
@@ -210,8 +210,8 @@ def action_test_domains_route_crud(a):
         a.error(500, "route path mismatch")
         return
 
-    if r["entity"] != "entity123":
-        a.error(500, "route entity mismatch")
+    if r["target"] != "entity123":
+        a.error(500, "route target mismatch")
         return
 
     if r["priority"] != 10:
@@ -265,8 +265,8 @@ def action_test_domains_cascade_delete(a):
     mochi.domain.register("test-cascade.example.com")
 
     # Create routes
-    mochi.domain.route.create("test-cascade.example.com", "/a", "entity-a", 0)
-    mochi.domain.route.create("test-cascade.example.com", "/b", "entity-b", 0)
+    mochi.domain.route.create("test-cascade.example.com", "/a", "app", "entity-a", 0)
+    mochi.domain.route.create("test-cascade.example.com", "/b", "app", "entity-b", 0)
 
     # Verify routes exist
     routes = mochi.domain.route.list("test-cascade.example.com")
@@ -308,12 +308,12 @@ def action_test_domains_delegation_full(a):
         return
 
     # User should be able to create routes anywhere on the domain
-    r = mochi.domain.route.create("full-delegation.example.com", "/blog", "entity123", 0)
+    r = mochi.domain.route.create("full-delegation.example.com", "/blog", "app", "entity123", 0)
     if r == None:
         a.error(500, "user with full delegation should be able to create route")
         return
 
-    r = mochi.domain.route.create("full-delegation.example.com", "/shop", "entity456", 0)
+    r = mochi.domain.route.create("full-delegation.example.com", "/shop", "app", "entity456", 0)
     if r == None:
         a.error(500, "user with full delegation should be able to create any route")
         return
@@ -373,7 +373,7 @@ def action_test_domains_route_context(a):
     mochi.domain.register("test-context.example.com")
 
     # Create route with context
-    r = mochi.domain.route.create("test-context.example.com", "/mypath", "entity123", 0, context="my-custom-context")
+    r = mochi.domain.route.create("test-context.example.com", "/mypath", "app", "entity123", 0, context="my-custom-context")
 
     if r == None:
         a.error(500, "route creation returned None")

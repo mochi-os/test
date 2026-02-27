@@ -426,10 +426,9 @@ def action_test_attachment_get_data_path(a):
         results.append({"test": "all_fields_present", "passed": False, "missing": missing})
         passed = False
 
-    # Test 3: Get attachment data (returns tuple of bytes, convert to string)
+    # Test 3: Get attachment data (returns bytes)
     data = mochi.attachment.data(att_id)
-    # Convert tuple of bytes to string for comparison
-    data_str = "".join([chr(b) for b in data]) if data else None
+    data_str = str(data) if data else None
     if data_str == original_content:
         results.append({"test": "data_matches", "passed": True})
     else:
@@ -645,9 +644,9 @@ def action_test_attachment_binary(a):
         results.append({"test": "large_size", "passed": False, "got": att_large["size"]})
         passed = False
 
-    # Test 4: Verify data integrity (convert tuple of bytes to string)
+    # Test 4: Verify data integrity
     retrieved = mochi.attachment.data(att_medium["id"])
-    retrieved_str = "".join([chr(b) for b in retrieved]) if retrieved else None
+    retrieved_str = str(retrieved) if retrieved else None
     if retrieved_str == medium_data:
         results.append({"test": "data_integrity", "passed": True})
     else:

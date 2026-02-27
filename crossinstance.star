@@ -226,7 +226,7 @@ def action_test_crossinstance_p2p_ping(a):
     headers = {
         "from": identity_id,
         "to": to,
-        "service": "claude-test",
+        "service": "test",
         "event": "ping"
     }
     content = {

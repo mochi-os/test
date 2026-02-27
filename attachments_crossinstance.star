@@ -195,7 +195,7 @@ def action_test_attachment_crossinstance_notify(a):
         passed = False
 
     # Test 2: Insert with notify
-    att2 = mochi.attachment.insert(object_id, "inserted.txt", "Inserted data", 0, "text/plain", "Inserted", "Description", notify_list)
+    att2 = mochi.attachment.insert(object_id, "inserted.txt", "Inserted data", 1, "text/plain", "Inserted", "Description", notify_list)
     if att2:
         results.append({"test": "insert_with_notify", "passed": True})
     else:

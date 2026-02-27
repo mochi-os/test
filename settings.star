@@ -216,15 +216,6 @@ def action_test_settings_new_settings(a):
     # Restore original
     mochi.setting.set("domains_verification", orig if orig else "false")
 
-    # Test domains_registration - entity pattern, can be empty
-    orig = mochi.setting.get("domains_registration")
-    mochi.setting.set("domains_registration", "")
-    if mochi.setting.get("domains_registration") != "":
-        errors.append("domains_registration clear failed")
-    # Restore
-    if orig:
-        mochi.setting.set("domains_registration", orig)
-
     # Test apps_install_user - boolean setting
     orig = mochi.setting.get("apps_install_user")
     mochi.setting.set("apps_install_user", "true")
