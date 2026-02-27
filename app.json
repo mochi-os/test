@@ -2,7 +2,7 @@
 // Copyright Alistair Cunningham 2025
 
 {
-	"version": "1.0",
+	"version": "1.1",
 	"label": "app_name",
 	"classes": ["test"],
 	"paths": ["test"],
@@ -205,13 +205,15 @@
 		"test_qid_search": {"function": "action_test_qid_search"},
 		"test_ai_prompt": {"function": "action_test_ai_prompt"},
 		"test_ai_prompt_no_account": {"function": "action_test_ai_prompt_no_account"},
-		"test_stage5_suite": {"function": "action_test_stage5_suite"}
+		"test_stage5_suite": {"function": "action_test_stage5_suite"},
+		"test_services_header": {"function": "action_test_services_header"}
 	},
 
 	"events": {
 		"ping": {"function": "event_ping"},
 		"pong": {"function": "event_pong"},
 		"broadcast": {"function": "event_broadcast"},
-		"appfile_stream": {"function": "event_appfile_stream"}
+		"appfile_stream": {"function": "event_appfile_stream"},
+		"services_check": {"function": "event_services_check"}
 	}
 }

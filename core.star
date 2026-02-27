@@ -93,6 +93,48 @@ def event_pong(e):
     """Handle incoming pong response"""
     print("Claude Test: Received pong from", e.header("from"), "original:", e.content("original"))
 
+def event_services_check(e):
+    """Return the sender's services header back via stream"""
+    services = e.header("services")
+    app = e.header("app")
+    e.write({"app": app, "services": services})
+
+def action_test_services_header(a):
+    """Test that the P2P services header is populated correctly"""
+    identity = a.user.identity
+    if not identity:
+        a.json({"passed": False, "error": "no identity"})
+        return
+
+    # Send a P2P request to ourselves
+    result = mochi.remote.request(identity.id, "test", "services_check", {})
+    if not result or "error" in result:
+        a.json({"passed": False, "error": "request failed", "result": result})
+        return
+
+    services = result.get("services", None)
+    app = result.get("app", "")
+
+    # The test app declares service "test", and should be the active handler
+    passed = True
+    results = []
+
+    # Check services is a tuple/list containing "test"
+    if services and "test" in services:
+        results.append({"test": "services_contains_test", "passed": True, "services": services})
+    else:
+        results.append({"test": "services_contains_test", "passed": False, "got": services})
+        passed = False
+
+    # Check app header is set
+    if app:
+        results.append({"test": "app_header_set", "passed": True, "app": app})
+    else:
+        results.append({"test": "app_header_set", "passed": False, "got": app})
+        passed = False
+
+    a.json({"passed": passed, "results": results})
+
 def action_broadcast(a):
     """Publish a broadcast message to all peers"""
     msg = a.input("msg", "hello")
