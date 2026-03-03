@@ -1,5 +1,5 @@
 # Makefile for Mochi apps
-# Copyright Alistair Cunningham 2025
+# Copyright Alistair Cunningham 2025-2026
 
 all: web/dist/index.html
 
