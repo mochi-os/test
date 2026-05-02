@@ -25,7 +25,8 @@
 		"domains.star",
 		"appfiles.star",
 		"entities.star",
-		"stage5.star"
+		"stage5.star",
+		"apis.star"
 	],
 
 	"database": {
@@ -206,7 +207,34 @@
 		"test_ai_prompt": {"function": "action_test_ai_prompt"},
 		"test_ai_prompt_no_account": {"function": "action_test_ai_prompt_no_account"},
 		"test_stage5_suite": {"function": "action_test_stage5_suite"},
-		"test_services_header": {"function": "action_test_services_header"}
+		"test_services_header": {"function": "action_test_services_header"},
+		"test_crypto_hash_sha256": {"function": "action_test_crypto_hash_sha256", "public": true},
+		"test_crypto_hash_sha256_bytes": {"function": "action_test_crypto_hash_sha256_bytes", "public": true},
+		"test_random_bytes": {"function": "action_test_random_bytes", "public": true},
+		"test_random_integer": {"function": "action_test_random_integer", "public": true},
+		"test_random_choice": {"function": "action_test_random_choice", "public": true},
+		"test_random_unambiguous": {"function": "action_test_random_unambiguous", "public": true},
+		"test_time_parse_rfc3339": {"function": "action_test_time_parse_rfc3339", "public": true},
+		"test_time_parse_round_trip": {"function": "action_test_time_parse_round_trip", "public": true},
+		"test_time_parse_invalid": {"function": "action_test_time_parse_invalid", "public": true},
+		"test_db_transaction_commit": {"function": "action_test_db_transaction_commit", "public": true},
+		"test_db_transaction_rollback": {"function": "action_test_db_transaction_rollback", "public": true},
+		"test_db_transaction_handle_methods": {"function": "action_test_db_transaction_handle_methods", "public": true},
+		"test_schedule_cancel": {"function": "action_test_schedule_cancel", "public": true},
+		"test_schedule_cancel_unknown": {"function": "action_test_schedule_cancel_unknown", "public": true},
+		"test_server_id": {"function": "action_test_server_id", "public": true},
+		"test_server_started": {"function": "action_test_server_started", "public": true},
+		"test_server_uptime": {"function": "action_test_server_uptime", "public": true},
+		"test_server_version": {"function": "action_test_server_version", "public": true},
+		"test_service_exists_true": {"function": "action_test_service_exists_true", "public": true},
+		"test_service_exists_false": {"function": "action_test_service_exists_false", "public": true},
+		"test_permission_level": {"function": "action_test_permission_level", "public": true},
+		"test_entity_fingerprint": {"function": "action_test_entity_fingerprint", "public": true},
+		"test_entity_info_by_fingerprint": {"function": "action_test_entity_info_by_fingerprint", "public": true},
+		"test_entity_name_by_fingerprint": {"function": "action_test_entity_name_by_fingerprint", "public": true},
+		"test_text_markdown": {"function": "action_test_text_markdown", "public": true},
+		"test_text_valid": {"function": "action_test_text_valid", "public": true},
+		"test_apis_suite": {"function": "action_test_apis_suite", "public": true}
 	},
 
 	"events": {
