@@ -497,8 +497,9 @@ def action_test_users_get_fingerprint_with_hyphens(a):
         a.json({"test": "users_get_fingerprint_with_hyphens", "status": "SKIP", "reason": "Requires administrator role"})
         return
 
-    # Get own fingerprint (with hyphens) using mochi.entity.fingerprint with hyphens=True
-    fingerprint = mochi.entity.fingerprint(a.user.identity.id, True)
+    # Get own fingerprint and add hyphens for the with-hyphens lookup test
+    raw = mochi.entity.fingerprint(a.user.identity.id)
+    fingerprint = raw[:3] + "-" + raw[3:6] + "-" + raw[6:]
     result = mochi.user.get.fingerprint(fingerprint)
 
     if result == None:
