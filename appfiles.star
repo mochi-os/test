@@ -1,5 +1,5 @@
 # Mochi Test app: App file API tests
-# Tests for mochi.app.asset.* and a.write_from_app()
+# Tests for mochi.app.asset.* and a.write.asset()
 
 # =============================================================================
 # mochi.app.asset.exists() tests
@@ -167,35 +167,35 @@ def action_test_appfile_read_traversal(a):
     })
 
 # =============================================================================
-# a.write_from_app() tests
+# a.write.asset() tests
 # =============================================================================
 
 def action_test_write_from_app_text(a):
-    """Test a.write_from_app() serves a text file"""
+    """Test a.write.asset() serves a text file"""
     # This action serves the file directly - test by calling and checking response
-    a.write_from_app("testdata/sample.txt")
+    a.write.asset("testdata/sample.txt")
 
 def action_test_write_from_app_json(a):
-    """Test a.write_from_app() serves a JSON file with correct content-type"""
-    a.write_from_app("testdata/config.json")
+    """Test a.write.asset() serves a JSON file with correct content-type"""
+    a.write.asset("testdata/config.json")
 
 def action_test_write_from_app_nested(a):
-    """Test a.write_from_app() serves a nested file"""
-    a.write_from_app("testdata/subdir/nested.txt")
+    """Test a.write.asset() serves a nested file"""
+    a.write.asset("testdata/subdir/nested.txt")
 
 def action_test_write_from_app_custom_content_type(a):
-    """Test a.write_from_app() respects manually set Content-Type"""
+    """Test a.write.asset() respects manually set Content-Type"""
     a.header("Content-Type", "text/plain; charset=utf-8")
-    a.write_from_app("testdata/config.json")
+    a.write.asset("testdata/config.json")
 
 def action_test_write_from_app_missing(a):
-    """Test a.write_from_app() returns 404 for missing file"""
-    a.write_from_app("testdata/nonexistent.txt")
+    """Test a.write.asset() returns 404 for missing file"""
+    a.write.asset("testdata/nonexistent.txt")
 
 def action_test_write_from_app_traversal(a):
-    """Test a.write_from_app() rejects path traversal"""
+    """Test a.write.asset() rejects path traversal"""
     # Should return 400 Bad Request for invalid path
-    a.write_from_app("../app.json")
+    a.write.asset("../app.json")
 
 # =============================================================================
 # Test suites
