@@ -370,7 +370,7 @@ def action_test_appfile_suite(a):
     })
 
 # =============================================================================
-# P2P streaming tests (e.write_from_app / s.write.asset)
+# P2P streaming tests (e.write.asset / s.write.asset)
 # =============================================================================
 
 def event_appfile_stream(e):
@@ -379,7 +379,7 @@ def event_appfile_stream(e):
     path = e.content("path")
     if not path:
         path = "testdata/sample.txt"
-    e.write_from_app(path)
+    e.write.asset(path)
 
 def action_test_appfile_p2p_stream(a):
     """Test P2P streaming of app files.
