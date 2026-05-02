@@ -370,7 +370,7 @@ def action_test_appfile_suite(a):
     })
 
 # =============================================================================
-# P2P streaming tests (e.write_from_app / s.write_from_app)
+# P2P streaming tests (e.write_from_app / s.write.asset)
 # =============================================================================
 
 def event_appfile_stream(e):
