@@ -1,44 +1,44 @@
 # Mochi Test app: App file API tests
-# Tests for mochi.app.file.* and a.write_from_app()
+# Tests for mochi.app.asset.* and a.write_from_app()
 
 # =============================================================================
-# mochi.app.file.exists() tests
+# mochi.app.asset.exists() tests
 # =============================================================================
 
 def action_test_appfile_exists_found(a):
-    """Test mochi.app.file.exists() with an existing file"""
-    result = mochi.app.file.exists("testdata/sample.txt")
+    """Test mochi.app.asset.exists() with an existing file"""
+    result = mochi.app.asset.exists("testdata/sample.txt")
     if result:
         a.json({"test": "appfile_exists_found", "status": "ok"})
     else:
         a.json({"test": "appfile_exists_found", "status": "FAIL", "error": "File should exist but doesn't"})
 
 def action_test_appfile_exists_not_found(a):
-    """Test mochi.app.file.exists() with a non-existent file"""
-    result = mochi.app.file.exists("testdata/nonexistent.txt")
+    """Test mochi.app.asset.exists() with a non-existent file"""
+    result = mochi.app.asset.exists("testdata/nonexistent.txt")
     if not result:
         a.json({"test": "appfile_exists_not_found", "status": "ok"})
     else:
         a.json({"test": "appfile_exists_not_found", "status": "FAIL", "error": "File should not exist"})
 
 def action_test_appfile_exists_directory(a):
-    """Test mochi.app.file.exists() with a directory"""
-    result = mochi.app.file.exists("testdata")
+    """Test mochi.app.asset.exists() with a directory"""
+    result = mochi.app.asset.exists("testdata")
     if result:
         a.json({"test": "appfile_exists_directory", "status": "ok"})
     else:
         a.json({"test": "appfile_exists_directory", "status": "FAIL", "error": "Directory should exist"})
 
 def action_test_appfile_exists_nested(a):
-    """Test mochi.app.file.exists() with a nested file"""
-    result = mochi.app.file.exists("testdata/subdir/nested.txt")
+    """Test mochi.app.asset.exists() with a nested file"""
+    result = mochi.app.asset.exists("testdata/subdir/nested.txt")
     if result:
         a.json({"test": "appfile_exists_nested", "status": "ok"})
     else:
         a.json({"test": "appfile_exists_nested", "status": "FAIL", "error": "Nested file should exist"})
 
 def action_test_appfile_exists_traversal(a):
-    """Test mochi.app.file.exists() rejects path traversal attempts"""
+    """Test mochi.app.asset.exists() rejects path traversal attempts"""
     # These should all return False or be rejected
     tests = [
         "../app.json",
@@ -47,7 +47,7 @@ def action_test_appfile_exists_traversal(a):
     ]
 
     for path in tests:
-        result = mochi.app.file.exists(path)
+        result = mochi.app.asset.exists(path)
         if result:
             a.json({"test": "appfile_exists_traversal", "status": "FAIL", "error": "Path traversal not blocked: " + path})
             return
@@ -55,65 +55,65 @@ def action_test_appfile_exists_traversal(a):
     a.json({"test": "appfile_exists_traversal", "status": "ok"})
 
 def action_test_appfile_exists_dotfile(a):
-    """Test mochi.app.file.exists() rejects paths starting with dot"""
+    """Test mochi.app.asset.exists() rejects paths starting with dot"""
     # Paths starting with . should be rejected by validation
-    result = mochi.app.file.exists(".hidden")
+    result = mochi.app.asset.exists(".hidden")
     if not result:
         a.json({"test": "appfile_exists_dotfile", "status": "ok"})
     else:
         a.json({"test": "appfile_exists_dotfile", "status": "FAIL", "error": "Dotfile path should be rejected"})
 
 # =============================================================================
-# mochi.app.file.list() tests
+# mochi.app.asset.list() tests
 # =============================================================================
 
 def action_test_appfile_list_directory(a):
-    """Test mochi.app.file.list() on a directory"""
-    result = mochi.app.file.list("testdata")
+    """Test mochi.app.asset.list() on a directory"""
+    result = mochi.app.asset.list("testdata")
     if "sample.txt" in result and "config.json" in result and "subdir" in result:
         a.json({"test": "appfile_list_directory", "status": "ok", "files": result})
     else:
         a.json({"test": "appfile_list_directory", "status": "FAIL", "error": "Expected files not found", "files": result})
 
 def action_test_appfile_list_subdirectory(a):
-    """Test mochi.app.file.list() on a subdirectory"""
-    result = mochi.app.file.list("testdata/subdir")
+    """Test mochi.app.asset.list() on a subdirectory"""
+    result = mochi.app.asset.list("testdata/subdir")
     if "nested.txt" in result:
         a.json({"test": "appfile_list_subdirectory", "status": "ok", "files": result})
     else:
         a.json({"test": "appfile_list_subdirectory", "status": "FAIL", "error": "Expected nested.txt not found", "files": result})
 
 def action_test_appfile_list_missing(a):
-    """Test mochi.app.file.list() on a non-existent directory returns empty list"""
-    result = mochi.app.file.list("nonexistent_directory")
+    """Test mochi.app.asset.list() on a non-existent directory returns empty list"""
+    result = mochi.app.asset.list("nonexistent_directory")
     if len(result) == 0:
         a.json({"test": "appfile_list_missing", "status": "ok"})
     else:
         a.json({"test": "appfile_list_missing", "status": "FAIL", "error": "Should return empty list", "result": result})
 
 def action_test_appfile_list_file(a):
-    """Test mochi.app.file.list() on a file (not directory) returns empty list"""
-    result = mochi.app.file.list("testdata/sample.txt")
+    """Test mochi.app.asset.list() on a file (not directory) returns empty list"""
+    result = mochi.app.asset.list("testdata/sample.txt")
     if len(result) == 0:
         a.json({"test": "appfile_list_file", "status": "ok"})
     else:
         a.json({"test": "appfile_list_file", "status": "FAIL", "error": "Should return empty list for file", "result": result})
 
 def action_test_appfile_list_traversal(a):
-    """Test mochi.app.file.list() rejects path traversal attempts"""
-    result = mochi.app.file.list("../")
+    """Test mochi.app.asset.list() rejects path traversal attempts"""
+    result = mochi.app.asset.list("../")
     if len(result) == 0:
         a.json({"test": "appfile_list_traversal", "status": "ok"})
     else:
         a.json({"test": "appfile_list_traversal", "status": "FAIL", "error": "Path traversal not blocked", "result": result})
 
 # =============================================================================
-# mochi.app.file.read() tests
+# mochi.app.asset.read() tests
 # =============================================================================
 
 def action_test_appfile_read_text(a):
-    """Test mochi.app.file.read() on a text file"""
-    result = mochi.app.file.read("testdata/sample.txt")
+    """Test mochi.app.asset.read() on a text file"""
+    result = mochi.app.asset.read("testdata/sample.txt")
     content = str(result)
     if "sample text file" in content:
         a.json({"test": "appfile_read_text", "status": "ok", "length": len(result)})
@@ -121,8 +121,8 @@ def action_test_appfile_read_text(a):
         a.json({"test": "appfile_read_text", "status": "FAIL", "error": "Content mismatch", "content": content[:100]})
 
 def action_test_appfile_read_json(a):
-    """Test mochi.app.file.read() on a JSON file"""
-    result = mochi.app.file.read("testdata/config.json")
+    """Test mochi.app.asset.read() on a JSON file"""
+    result = mochi.app.asset.read("testdata/config.json")
     content = str(result)
     if '"name": "test"' in content:
         a.json({"test": "appfile_read_json", "status": "ok"})
@@ -130,8 +130,8 @@ def action_test_appfile_read_json(a):
         a.json({"test": "appfile_read_json", "status": "FAIL", "error": "Content mismatch", "content": content})
 
 def action_test_appfile_read_nested(a):
-    """Test mochi.app.file.read() on a nested file"""
-    result = mochi.app.file.read("testdata/subdir/nested.txt")
+    """Test mochi.app.asset.read() on a nested file"""
+    result = mochi.app.asset.read("testdata/subdir/nested.txt")
     content = str(result)
     if "Nested file content" in content:
         a.json({"test": "appfile_read_nested", "status": "ok"})
@@ -139,8 +139,8 @@ def action_test_appfile_read_nested(a):
         a.json({"test": "appfile_read_nested", "status": "FAIL", "error": "Content mismatch", "content": content})
 
 def action_test_appfile_read_appjson(a):
-    """Test mochi.app.file.read() can read app.json (app's own manifest)"""
-    result = mochi.app.file.read("app.json")
+    """Test mochi.app.asset.read() can read app.json (app's own manifest)"""
+    result = mochi.app.asset.read("app.json")
     content = str(result)
     if '"version"' in content:
         a.json({"test": "appfile_read_appjson", "status": "ok"})
@@ -148,17 +148,17 @@ def action_test_appfile_read_appjson(a):
         a.json({"test": "appfile_read_appjson", "status": "FAIL", "error": "Could not read app.json"})
 
 def action_test_appfile_read_missing(a):
-    """Test mochi.app.file.read() on a non-existent file returns error"""
+    """Test mochi.app.asset.read() on a non-existent file returns error"""
     # In Starlark, we can't catch exceptions, so this test documents expected behavior
     # The function should return an error when file doesn't exist
     a.json({
         "test": "appfile_read_missing",
         "status": "info",
-        "note": "Cannot test error case in Starlark (no try/except). mochi.app.file.read() returns error for missing files."
+        "note": "Cannot test error case in Starlark (no try/except). mochi.app.asset.read() returns error for missing files."
     })
 
 def action_test_appfile_read_traversal(a):
-    """Test mochi.app.file.read() rejects path traversal - documents expected behavior"""
+    """Test mochi.app.asset.read() rejects path traversal - documents expected behavior"""
     # Can't test this directly without try/except, but validation should block it
     a.json({
         "test": "appfile_read_traversal",
@@ -202,31 +202,31 @@ def action_test_write_from_app_traversal(a):
 # =============================================================================
 
 def action_test_appfile_exists_suite(a):
-    """Run all mochi.app.file.exists() tests"""
+    """Run all mochi.app.asset.exists() tests"""
     results = []
 
     # exists found
-    r = mochi.app.file.exists("testdata/sample.txt")
+    r = mochi.app.asset.exists("testdata/sample.txt")
     results.append({"test": "exists_found", "passed": r == True})
 
     # exists not found
-    r = mochi.app.file.exists("testdata/nonexistent.txt")
+    r = mochi.app.asset.exists("testdata/nonexistent.txt")
     results.append({"test": "exists_not_found", "passed": r == False})
 
     # exists directory
-    r = mochi.app.file.exists("testdata")
+    r = mochi.app.asset.exists("testdata")
     results.append({"test": "exists_directory", "passed": r == True})
 
     # exists nested
-    r = mochi.app.file.exists("testdata/subdir/nested.txt")
+    r = mochi.app.asset.exists("testdata/subdir/nested.txt")
     results.append({"test": "exists_nested", "passed": r == True})
 
     # exists traversal blocked
-    r = mochi.app.file.exists("../app.json")
+    r = mochi.app.asset.exists("../app.json")
     results.append({"test": "exists_traversal_blocked", "passed": r == False})
 
     # exists dotfile blocked
-    r = mochi.app.file.exists(".git")
+    r = mochi.app.asset.exists(".git")
     results.append({"test": "exists_dotfile_blocked", "passed": r == False})
 
     passed = len([r for r in results if r["passed"]])
@@ -241,27 +241,27 @@ def action_test_appfile_exists_suite(a):
     })
 
 def action_test_appfile_list_suite(a):
-    """Run all mochi.app.file.list() tests"""
+    """Run all mochi.app.asset.list() tests"""
     results = []
 
     # list directory
-    r = mochi.app.file.list("testdata")
+    r = mochi.app.asset.list("testdata")
     results.append({"test": "list_directory", "passed": "sample.txt" in r and "config.json" in r})
 
     # list subdirectory
-    r = mochi.app.file.list("testdata/subdir")
+    r = mochi.app.asset.list("testdata/subdir")
     results.append({"test": "list_subdirectory", "passed": "nested.txt" in r})
 
     # list missing returns empty
-    r = mochi.app.file.list("nonexistent")
+    r = mochi.app.asset.list("nonexistent")
     results.append({"test": "list_missing", "passed": len(r) == 0})
 
     # list file returns empty
-    r = mochi.app.file.list("testdata/sample.txt")
+    r = mochi.app.asset.list("testdata/sample.txt")
     results.append({"test": "list_file", "passed": len(r) == 0})
 
     # list traversal blocked
-    r = mochi.app.file.list("../")
+    r = mochi.app.asset.list("../")
     results.append({"test": "list_traversal_blocked", "passed": len(r) == 0})
 
     passed = len([r for r in results if r["passed"]])
@@ -276,23 +276,23 @@ def action_test_appfile_list_suite(a):
     })
 
 def action_test_appfile_read_suite(a):
-    """Run all mochi.app.file.read() tests"""
+    """Run all mochi.app.asset.read() tests"""
     results = []
 
     # read text file
-    r = mochi.app.file.read("testdata/sample.txt")
+    r = mochi.app.asset.read("testdata/sample.txt")
     results.append({"test": "read_text", "passed": "sample text file" in str(r)})
 
     # read json file
-    r = mochi.app.file.read("testdata/config.json")
+    r = mochi.app.asset.read("testdata/config.json")
     results.append({"test": "read_json", "passed": '"name": "test"' in str(r)})
 
     # read nested file
-    r = mochi.app.file.read("testdata/subdir/nested.txt")
+    r = mochi.app.asset.read("testdata/subdir/nested.txt")
     results.append({"test": "read_nested", "passed": "Nested file content" in str(r)})
 
     # read app.json
-    r = mochi.app.file.read("app.json")
+    r = mochi.app.asset.read("app.json")
     results.append({"test": "read_appjson", "passed": '"version"' in str(r)})
 
     passed = len([r for r in results if r["passed"]])
@@ -311,51 +311,51 @@ def action_test_appfile_suite(a):
     results = []
 
     # === exists tests ===
-    r = mochi.app.file.exists("testdata/sample.txt")
+    r = mochi.app.asset.exists("testdata/sample.txt")
     results.append({"test": "exists_found", "passed": r == True})
 
-    r = mochi.app.file.exists("testdata/nonexistent.txt")
+    r = mochi.app.asset.exists("testdata/nonexistent.txt")
     results.append({"test": "exists_not_found", "passed": r == False})
 
-    r = mochi.app.file.exists("testdata")
+    r = mochi.app.asset.exists("testdata")
     results.append({"test": "exists_directory", "passed": r == True})
 
-    r = mochi.app.file.exists("testdata/subdir/nested.txt")
+    r = mochi.app.asset.exists("testdata/subdir/nested.txt")
     results.append({"test": "exists_nested", "passed": r == True})
 
-    r = mochi.app.file.exists("../app.json")
+    r = mochi.app.asset.exists("../app.json")
     results.append({"test": "exists_traversal_blocked", "passed": r == False})
 
-    r = mochi.app.file.exists(".git")
+    r = mochi.app.asset.exists(".git")
     results.append({"test": "exists_dotfile_blocked", "passed": r == False})
 
     # === list tests ===
-    r = mochi.app.file.list("testdata")
+    r = mochi.app.asset.list("testdata")
     results.append({"test": "list_directory", "passed": "sample.txt" in r and "config.json" in r})
 
-    r = mochi.app.file.list("testdata/subdir")
+    r = mochi.app.asset.list("testdata/subdir")
     results.append({"test": "list_subdirectory", "passed": "nested.txt" in r})
 
-    r = mochi.app.file.list("nonexistent")
+    r = mochi.app.asset.list("nonexistent")
     results.append({"test": "list_missing", "passed": len(r) == 0})
 
-    r = mochi.app.file.list("testdata/sample.txt")
+    r = mochi.app.asset.list("testdata/sample.txt")
     results.append({"test": "list_file_not_dir", "passed": len(r) == 0})
 
-    r = mochi.app.file.list("../")
+    r = mochi.app.asset.list("../")
     results.append({"test": "list_traversal_blocked", "passed": len(r) == 0})
 
     # === read tests ===
-    r = mochi.app.file.read("testdata/sample.txt")
+    r = mochi.app.asset.read("testdata/sample.txt")
     results.append({"test": "read_text", "passed": "sample text file" in str(r)})
 
-    r = mochi.app.file.read("testdata/config.json")
+    r = mochi.app.asset.read("testdata/config.json")
     results.append({"test": "read_json", "passed": '"name": "test"' in str(r)})
 
-    r = mochi.app.file.read("testdata/subdir/nested.txt")
+    r = mochi.app.asset.read("testdata/subdir/nested.txt")
     results.append({"test": "read_nested", "passed": "Nested file content" in str(r)})
 
-    r = mochi.app.file.read("app.json")
+    r = mochi.app.asset.read("app.json")
     results.append({"test": "read_appjson", "passed": '"version"' in str(r)})
 
     passed = len([r for r in results if r["passed"]])
