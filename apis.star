@@ -203,6 +203,24 @@ def action_test_text_valid(a):
 	bad = mochi.text.valid("contains spaces", "constant")
 	a.json({"pass": ok == True and bad == False, "ok": ok, "bad": bad})
 
+def action_test_text_slug(a):
+	cases = [
+		("Hello, World!", "hello-world"),
+		("Café Olé", "cafe-ole"),
+		("  spaces   here  ", "spaces-here"),
+		("---", ""),
+		("", ""),
+		("Sprint 10", "sprint-10"),
+	]
+	results = []
+	all_ok = True
+	for input, expected in cases:
+		got = mochi.text.slug(input)
+		ok = got == expected
+		all_ok = all_ok and ok
+		results.append({"input": input, "expected": expected, "got": got, "pass": ok})
+	a.json({"pass": all_ok, "cases": results})
+
 # Suite - run them all and tally
 
 def action_test_apis_suite(a):
@@ -234,6 +252,9 @@ def action_test_apis_suite(a):
 	results.append({"test": "text_markdown", "pass": "<h1>" in mochi.text.markdown("# hi")})
 	results.append({"test": "text_valid_ok", "pass": mochi.text.valid("abc-123", "constant") == True})
 	results.append({"test": "text_valid_bad", "pass": mochi.text.valid("has spaces", "constant") == False})
+	results.append({"test": "text_slug_basic", "pass": mochi.text.slug("Hello, World!") == "hello-world"})
+	results.append({"test": "text_slug_accents", "pass": mochi.text.slug("Café Olé") == "cafe-ole"})
+	results.append({"test": "text_slug_empty", "pass": mochi.text.slug("---") == ""})
 
 	passed = len([r for r in results if r["pass"]])
 	a.json({"passed": passed, "total": len(results), "results": results})

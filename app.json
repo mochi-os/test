@@ -234,6 +234,7 @@
 		"test_entity_name_by_fingerprint": {"function": "action_test_entity_name_by_fingerprint", "public": true},
 		"test_text_markdown": {"function": "action_test_text_markdown", "public": true},
 		"test_text_valid": {"function": "action_test_text_valid", "public": true},
+		"test_text_slug": {"function": "action_test_text_slug", "public": true},
 		"test_apis_suite": {"function": "action_test_apis_suite", "public": true}
 	},
 
