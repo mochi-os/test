@@ -2,7 +2,7 @@
 // Copyright Alistair Cunningham 2025-2026
 
 {
-	"version": "1.1",
+	"version": "1.2",
 	"label": "app.name",
 	"classes": ["test"],
 	"paths": ["test"],
@@ -26,7 +26,8 @@
 		"appfiles.star",
 		"entities.star",
 		"stage5.star",
-		"apis.star"
+		"apis.star",
+		"unifiedpush.star"
 	],
 
 	"database": {
@@ -61,6 +62,9 @@
 		"test_db_limit": {"function": "action_test_db_limit", "public": true},
 		"test_db_cleanup": {"function": "action_test_db_cleanup", "public": true},
 		"test_p2p_rate_limit": {"function": "action_test_p2p_rate_limit", "public": true},
+		"test_unifiedpush_register_local": {"function": "action_test_unifiedpush_register_local", "public": true},
+		"test_unifiedpush_register_foreign": {"function": "action_test_unifiedpush_register_foreign", "public": true},
+		"test_unifiedpush_register_validation": {"function": "action_test_unifiedpush_register_validation", "public": true},
 		"test_groups_crud": {"function": "action_test_groups_crud", "public": true},
 		"test_groups_members": {"function": "action_test_groups_members", "public": true},
 		"test_groups_nested": {"function": "action_test_groups_nested", "public": true},
