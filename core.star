@@ -186,6 +186,272 @@ def action_test_detach(a):
     result = mochi.db.execute("DETACH DATABASE main")
     a.json({"blocked": False, "result": result, "error": "DETACH was NOT blocked - SECURITY VULNERABILITY!"})
 
+# ----------------------------------------------------------------------
+# Starlark-pool authoriser policy tests.
+#
+# The Starlark connection pool installs an authoriser that denies
+# ATTACH, DETACH, PRAGMA writes, triggers, and virtual table creation.
+# VACUUM and ANALYZE are caught at the api-layer string-prefix gate.
+# Allowed operations cover ordinary CRUD, schema (CREATE/DROP TABLE/
+# INDEX/VIEW, ALTER TABLE), and transactions / savepoints.
+#
+# Because Starlark has no try/except, a denied SQL call raises an
+# error that aborts the action. So each denied case is its own
+# endpoint: if the action reaches a.json(), the denial leaked and
+# the test reports FAIL — otherwise the action errors out (5xx) and
+# the test runner treats that as PASS.
+#
+# Allowed operations are bundled into one endpoint that runs them
+# sequentially and returns the count of successful steps.
+
+# ---- denied: PRAGMA writes ----
+
+def action_test_authoriser_pragma_write(a):
+    """PRAGMA writes (with argument) must be denied."""
+    mochi.db.execute("PRAGMA max_page_count = 999999999")
+    a.json({"status": "FAIL", "error": "PRAGMA write was NOT blocked - SECURITY VULNERABILITY!"})
+
+def action_test_authoriser_pragma_multistmt(a):
+    """`BEGIN; PRAGMA write; COMMIT;` must still be denied per-statement."""
+    mochi.db.execute("BEGIN; PRAGMA max_page_count = 999999999; COMMIT")
+    a.json({"status": "FAIL", "error": "multi-statement PRAGMA write was NOT blocked - SECURITY VULNERABILITY!"})
+
+# ---- denied: triggers / virtual tables ----
+
+def action_test_authoriser_create_trigger(a):
+    """CREATE TRIGGER must be denied."""
+    mochi.db.execute("CREATE TABLE IF NOT EXISTS auth_test (id INTEGER PRIMARY KEY, name TEXT)")
+    mochi.db.execute("CREATE TRIGGER auth_test_trg AFTER INSERT ON auth_test BEGIN UPDATE auth_test SET name='x'; END")
+    a.json({"status": "FAIL", "error": "CREATE TRIGGER was NOT blocked - SECURITY VULNERABILITY!"})
+
+def action_test_authoriser_create_vtable(a):
+    """CREATE VIRTUAL TABLE must be denied."""
+    mochi.db.execute("CREATE VIRTUAL TABLE auth_test_vt USING fts5(content)")
+    a.json({"status": "FAIL", "error": "CREATE VIRTUAL TABLE was NOT blocked - SECURITY VULNERABILITY!"})
+
+# ---- denied: VACUUM / ANALYZE (string-prefix gate) ----
+
+def action_test_authoriser_vacuum(a):
+    """VACUUM must be denied at the api-layer string-prefix gate."""
+    mochi.db.execute("VACUUM")
+    a.json({"status": "FAIL", "error": "VACUUM was NOT blocked - SECURITY VULNERABILITY!"})
+
+def action_test_authoriser_analyze(a):
+    """ANALYZE must be denied at the api-layer string-prefix gate."""
+    mochi.db.execute("ANALYZE")
+    a.json({"status": "FAIL", "error": "ANALYZE was NOT blocked - SECURITY VULNERABILITY!"})
+
+# ---- allowed: ordinary CRUD, schema, transactions ----
+
+def action_test_authoriser_allowed(a):
+    """Run every legitimate SQL operation a Starlark app might use.
+    Reaches a.json() only if everything succeeded."""
+    # Clean slate.
+    mochi.db.execute("DROP TABLE IF EXISTS auth_allowed")
+    mochi.db.execute("DROP TABLE IF EXISTS auth_allowed_extra")
+    mochi.db.execute("DROP VIEW IF EXISTS auth_allowed_view")
+
+    steps = []
+
+    # ----- DDL -----
+    mochi.db.execute("CREATE TABLE auth_allowed (id INTEGER PRIMARY KEY, name TEXT NOT NULL, score INTEGER NOT NULL DEFAULT 0)")
+    steps.append("CREATE TABLE")
+    mochi.db.execute("ALTER TABLE auth_allowed ADD COLUMN extra TEXT NOT NULL DEFAULT ''")
+    steps.append("ALTER TABLE")
+    mochi.db.execute("CREATE INDEX auth_allowed_name ON auth_allowed(name)")
+    steps.append("CREATE INDEX")
+    mochi.db.execute("CREATE VIEW auth_allowed_view AS SELECT id, name FROM auth_allowed")
+    steps.append("CREATE VIEW")
+
+    # ----- CRUD -----
+    mochi.db.execute("INSERT INTO auth_allowed (name, score) VALUES (?, ?)", "alice", 1)
+    mochi.db.execute("INSERT INTO auth_allowed (name, score) VALUES (?, ?)", "bob", 2)
+    steps.append("INSERT")
+    mochi.db.execute("UPDATE auth_allowed SET score = score + 10 WHERE name = ?", "alice")
+    steps.append("UPDATE")
+    rows = mochi.db.rows("SELECT id, name, score FROM auth_allowed ORDER BY name")
+    if len(rows) != 2:
+        a.json({"status": "FAIL", "error": "expected 2 rows, got " + str(len(rows)), "steps": steps})
+        return
+    if rows[0]["score"] != 11 or rows[1]["score"] != 2:
+        a.json({"status": "FAIL", "error": "row scores wrong: " + str(rows), "steps": steps})
+        return
+    steps.append("SELECT")
+    one = mochi.db.row("SELECT name FROM auth_allowed_view WHERE id = ?", rows[0]["id"])
+    if not one or one["name"] != "alice":
+        a.json({"status": "FAIL", "error": "view read wrong: " + str(one), "steps": steps})
+        return
+    steps.append("SELECT FROM VIEW")
+    mochi.db.execute("DELETE FROM auth_allowed WHERE name = ?", "bob")
+    steps.append("DELETE")
+
+    # ----- Transaction (this is the same path api_db_transaction uses) -----
+    tx = mochi.db.transaction()
+    tx.execute("INSERT INTO auth_allowed (name, score) VALUES (?, ?)", "carol", 3)
+    tx.execute("UPDATE auth_allowed SET score = score + 100 WHERE name = ?", "carol")
+    in_tx = tx.row("SELECT score FROM auth_allowed WHERE name = ?", "carol")
+    if not in_tx or in_tx["score"] != 103:
+        a.json({"status": "FAIL", "error": "tx read wrong: " + str(in_tx), "steps": steps})
+        return
+    tx.commit()
+    steps.append("TRANSACTION")
+
+    after_tx = mochi.db.row("SELECT score FROM auth_allowed WHERE name = ?", "carol")
+    if not after_tx or after_tx["score"] != 103:
+        a.json({"status": "FAIL", "error": "post-commit read wrong: " + str(after_tx), "steps": steps})
+        return
+    steps.append("post-commit SELECT")
+
+    # ----- Cleanup DDL -----
+    mochi.db.execute("DROP VIEW auth_allowed_view")
+    steps.append("DROP VIEW")
+    mochi.db.execute("DROP INDEX auth_allowed_name")
+    steps.append("DROP INDEX")
+    mochi.db.execute("DROP TABLE auth_allowed")
+    steps.append("DROP TABLE")
+
+    a.json({"status": "PASS", "steps": steps})
+
+# ---- introspection: mochi.db.table / indexes / tables (server-controlled
+#       PRAGMA paths that must keep working through the internal pool) ----
+
+def action_test_authoriser_introspection(a):
+    """Verify mochi.db.table / indexes / tables work — these run hardcoded
+    PRAGMA SQL on the server-trusted internal pool, so the authoriser
+    must not interfere with them. Reaches a.json() only on success."""
+    mochi.db.execute("DROP TABLE IF EXISTS auth_introspect")
+    mochi.db.execute("CREATE TABLE auth_introspect (id INTEGER PRIMARY KEY, name TEXT NOT NULL, score INTEGER NOT NULL DEFAULT 0)")
+    mochi.db.execute("CREATE INDEX auth_introspect_name ON auth_introspect(name)")
+
+    # tables() should include our table.
+    tables = mochi.db.tables()
+    found = False
+    for t in tables:
+        if t == "auth_introspect":
+            found = True
+            break
+    if not found:
+        a.json({"status": "FAIL", "error": "auth_introspect not in mochi.db.tables(): " + str(tables)})
+        return
+
+    # table() returns the column list with name/type for each column.
+    cols = mochi.db.table("auth_introspect")
+    if len(cols) != 3:
+        a.json({"status": "FAIL", "error": "expected 3 columns, got " + str(len(cols)) + ": " + str(cols)})
+        return
+    col_names = [c["name"] for c in cols]
+    if col_names != ["id", "name", "score"]:
+        a.json({"status": "FAIL", "error": "unexpected column order: " + str(col_names)})
+        return
+
+    # indexes() should report the index we just created.
+    idx = mochi.db.indexes("auth_introspect")
+    found_idx = False
+    for i in idx:
+        if i["name"] == "auth_introspect_name":
+            found_idx = True
+            break
+    if not found_idx:
+        a.json({"status": "FAIL", "error": "auth_introspect_name not in indexes: " + str(idx)})
+        return
+
+    mochi.db.execute("DROP TABLE auth_introspect")
+    a.json({"status": "PASS", "tables_count": len(tables), "cols": col_names, "indexes_count": len(idx)})
+
+# ---- foreign_keys=ON liveness (set by ConnectHook before authoriser) ----
+
+def action_test_authoriser_fk_violation(a):
+    """An INSERT that violates a FK must error. Confirms that the
+    ConnectHook's `PRAGMA foreign_keys=ON` is live on the starlark pool.
+    The action is expected to error out — if it reaches a.json() the
+    PRAGMA didn't take effect."""
+    # Setup: parent + child via internal-pool DDL (which our `mochi.db.execute`
+    # runs over the starlark pool, but DDL is allowed for both).
+    mochi.db.execute("DROP TABLE IF EXISTS auth_fk_child")
+    mochi.db.execute("DROP TABLE IF EXISTS auth_fk_parent")
+    mochi.db.execute("CREATE TABLE auth_fk_parent (id INTEGER PRIMARY KEY)")
+    mochi.db.execute("CREATE TABLE auth_fk_child (id INTEGER PRIMARY KEY, parent INTEGER NOT NULL REFERENCES auth_fk_parent(id))")
+
+    # This INSERT references a parent row that doesn't exist; with
+    # foreign_keys=ON it must fail with a constraint error.
+    mochi.db.execute("INSERT INTO auth_fk_child (id, parent) VALUES (1, 999)")
+    # Cleanup will only run if FK enforcement is OFF — that's a failure.
+    mochi.db.execute("DROP TABLE auth_fk_child")
+    mochi.db.execute("DROP TABLE auth_fk_parent")
+    a.json({"status": "FAIL", "error": "FK violation was NOT caught — foreign_keys=ON is not live!"})
+
+def action_test_authoriser_fk_cleanup(a):
+    """Companion endpoint: clean up the FK test tables after the
+    expected-failure run leaves them behind."""
+    mochi.db.execute("DROP TABLE IF EXISTS auth_fk_child")
+    mochi.db.execute("DROP TABLE IF EXISTS auth_fk_parent")
+    a.json({"cleaned": True})
+
+# ---- fresh-app install round-trip ----
+#
+# Mimics what happens when an app is installed for the first time: the
+# database_create() function builds a schema, the app writes some data
+# inside a transaction, reads it back through subsequent calls, then
+# tears down. Exercises the same code path apps go through on first
+# user access — ConnectHook setup, DDL, transactional writes, view
+# reads, FK enforcement, and finally cleanup.
+
+def action_test_authoriser_roundtrip(a):
+    """Round-trip a small schema through the starlark pool: create →
+    transactional writes → reads → FK enforcement → drop. Reaches
+    a.json() only if every step succeeded."""
+    # Clean slate.
+    mochi.db.execute("DROP VIEW IF EXISTS rt_post_with_author")
+    mochi.db.execute("DROP TABLE IF EXISTS rt_post")
+    mochi.db.execute("DROP TABLE IF EXISTS rt_author")
+
+    # Schema (what database_create() would do).
+    mochi.db.execute("CREATE TABLE rt_author (id INTEGER PRIMARY KEY, name TEXT NOT NULL UNIQUE)")
+    mochi.db.execute("CREATE TABLE rt_post (id INTEGER PRIMARY KEY, author INTEGER NOT NULL REFERENCES rt_author(id) ON DELETE CASCADE, title TEXT NOT NULL, body TEXT NOT NULL DEFAULT '', created INTEGER NOT NULL)")
+    mochi.db.execute("CREATE INDEX rt_post_author ON rt_post(author)")
+    mochi.db.execute("CREATE VIEW rt_post_with_author AS SELECT p.id, p.title, a.name AS author_name FROM rt_post p JOIN rt_author a ON a.id = p.author")
+
+    # Transactional writes: a row in rt_author then several rt_post rows
+    # referencing it. Commit. The transaction must use the starlark pool
+    # path (api_db_transaction).
+    tx = mochi.db.transaction()
+    tx.execute("INSERT INTO rt_author (name) VALUES (?)", "alice")
+    author_row = tx.row("SELECT id FROM rt_author WHERE name = ?", "alice")
+    if not author_row:
+        tx.rollback()
+        a.json({"status": "FAIL", "error": "author insert/read failed"})
+        return
+    aid = author_row["id"]
+    now = mochi.time.now()
+    for title in ["First post", "Second post", "Third post"]:
+        tx.execute("INSERT INTO rt_post (author, title, created) VALUES (?, ?, ?)", aid, title, now)
+    tx.commit()
+
+    # Reads after commit.
+    posts = mochi.db.rows("SELECT id, title, author_name FROM rt_post_with_author ORDER BY id")
+    if len(posts) != 3:
+        a.json({"status": "FAIL", "error": "expected 3 posts, got " + str(len(posts)) + ": " + str(posts)})
+        return
+    for p in posts:
+        if p["author_name"] != "alice":
+            a.json({"status": "FAIL", "error": "view join wrong: " + str(p)})
+            return
+
+    # ON DELETE CASCADE: deleting the author should remove the posts.
+    # This also confirms FK is live on the starlark pool.
+    mochi.db.execute("DELETE FROM rt_author WHERE id = ?", aid)
+    after = mochi.db.rows("SELECT id FROM rt_post")
+    if len(after) != 0:
+        a.json({"status": "FAIL", "error": "cascade delete didn't fire — " + str(len(after)) + " posts remain"})
+        return
+
+    # Cleanup.
+    mochi.db.execute("DROP VIEW rt_post_with_author")
+    mochi.db.execute("DROP TABLE rt_post")
+    mochi.db.execute("DROP TABLE rt_author")
+
+    a.json({"status": "PASS", "posts_seen": len(posts)})
+
 def action_test_storage_limit(a):
     """Test file storage limit by writing 1GB of data.
     Writes 10 x 100MB files (1000MB total), then tries an 11th.
