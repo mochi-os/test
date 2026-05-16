@@ -32,8 +32,12 @@
 
 	"database": {
 		"file": "test.db",
-		"schema": 2,
-		"create": {"function": "database_create"}
+		"schema": 3,
+		"create": {"function": "database_create"},
+		"upgrade": {"function": "database_upgrade"},
+		"replicate": {
+			"exclude": {"tables": ["test_excluded"]}
+		}
 	},
 
 	"actions": {
@@ -41,6 +45,11 @@
 		"attachments": {"attachments": true},
 		"send": {"function": "action_send"},
 		"status": {"function": "action_status"},
+		"replication/write": {"function": "action_replication_write"},
+		"replication/read": {"function": "action_replication_read"},
+		"replication/update": {"function": "action_replication_update"},
+		"replication/delete": {"function": "action_replication_delete"},
+		"replication/excluded/write": {"function": "action_replication_excluded_write"},
 		"ping": {"function": "action_ping", "public": true},
 		"broadcast": {"function": "action_broadcast"},
 		"test_broadcast": {"function": "action_test_broadcast", "public": true},

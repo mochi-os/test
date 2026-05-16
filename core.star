@@ -4,6 +4,11 @@
 def database_create():
     """Create test database schema"""
     mochi.db.execute("create table test ( id text primary key, value text )")
+    mochi.db.execute("create table test_excluded ( id text primary key, value text )")
+
+def database_upgrade(version):
+    if version == 3:
+        mochi.db.execute("create table if not exists test_excluded ( id text primary key, value text )")
 
 def action_index(a):
     """Show test app status and controls"""
@@ -43,6 +48,49 @@ def action_status(a):
         "identity": a.user.identity.id,
         "time": mochi.time.now()
     })
+
+def action_replication_write(a):
+    id = a.input("id")
+    value = a.input("value")
+    if not id or not value:
+        a.error(400, "missing id or value")
+        return
+    mochi.db.execute("insert into test (id, value) values (?, ?)", id, value)
+    a.json({"ok": True, "id": id, "value": value})
+
+def action_replication_read(a):
+    id = a.input("id")
+    if not id:
+        a.error(400, "missing id")
+        return
+    row = mochi.db.row("select value from test where id = ?", id)
+    a.json({"id": id, "value": row["value"] if row else None})
+
+def action_replication_update(a):
+    id = a.input("id")
+    value = a.input("value")
+    if not id or not value:
+        a.error(400, "missing id or value")
+        return
+    mochi.db.execute("update test set value = ? where id = ?", value, id)
+    a.json({"ok": True, "id": id, "value": value})
+
+def action_replication_delete(a):
+    id = a.input("id")
+    if not id:
+        a.error(400, "missing id")
+        return
+    mochi.db.execute("delete from test where id = ?", id)
+    a.json({"ok": True, "id": id})
+
+def action_replication_excluded_write(a):
+    id = a.input("id")
+    value = a.input("value")
+    if not id or not value:
+        a.error(400, "missing id or value")
+        return
+    mochi.db.execute("insert into test_excluded (id, value) values (?, ?)", id, value)
+    a.json({"ok": True, "id": id, "value": value})
 
 def action_ping(a):
     """Send a ping without authentication (accepts from parameter)"""
