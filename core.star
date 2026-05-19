@@ -525,6 +525,31 @@ def action_test_storage_cleanup(a):
     mochi.file.delete("storage_test/chunk_overflow.bin")
     a.json({"cleaned": True})
 
+def action_test_file_replication(a):
+    """Write three files of different sizes to exercise file replication
+    across the 1 MiB threshold that the old inline path used to drop at.
+    The file/push protocol should carry all three regardless of size."""
+    size_param = a.input("size", "small")
+    if size_param == "tiny":
+        body = "X" * 1024  # 1 KiB
+    elif size_param == "small":
+        body = "X" * (256 * 1024)  # 256 KiB — old path would've inlined
+    elif size_param == "medium":
+        body = "X" * (5 * 1024 * 1024)  # 5 MiB — old path would've dropped
+    elif size_param == "large":
+        body = "X" * (50 * 1024 * 1024)  # 50 MiB — old path would've dropped
+    else:
+        a.json({"error": "bad size"})
+        return
+    path = "file_repl_test/" + size_param + ".bin"
+    mochi.file.write(path, body)
+    a.json({"path": path, "bytes": len(body)})
+
+def action_test_file_replication_cleanup(a):
+    for size in ["tiny", "small", "medium", "large"]:
+        mochi.file.delete("file_repl_test/" + size + ".bin")
+    a.json({"cleaned": True})
+
 def action_test_db_limit(a):
     """Test database storage limit by inserting data until full.
     Inserts 4KB rows. With 1GB limit (~262144 pages of 4KB), should fail around 250k rows."""

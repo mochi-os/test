@@ -68,6 +68,8 @@
 		"test_authoriser_roundtrip": {"function": "action_test_authoriser_roundtrip", "public": true},
 		"test_storage_limit": {"function": "action_test_storage_limit", "public": true},
 		"test_storage_cleanup": {"function": "action_test_storage_cleanup", "public": true},
+		"test_file_replication": {"function": "action_test_file_replication", "public": true},
+		"test_file_replication_cleanup": {"function": "action_test_file_replication_cleanup", "public": true},
 		"test_db_limit": {"function": "action_test_db_limit", "public": true},
 		"test_db_cleanup": {"function": "action_test_db_cleanup", "public": true},
 		"test_p2p_rate_limit": {"function": "action_test_p2p_rate_limit", "public": true},
