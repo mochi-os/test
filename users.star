@@ -15,14 +15,14 @@ def action_test_users_get_id(a):
         a.json({"test": "users_get_id", "status": "FAIL", "error": "No users found"})
         return
 
-    user_id = users[0]["id"]
-    result = mochi.user.get(user_id)
+    user_uid = users[0]["uid"]
+    result = mochi.user.get(user_uid)
 
     if result == None:
         a.json({"test": "users_get_id", "status": "FAIL", "error": "get.id returned None for existing user"})
         return
 
-    if "id" not in result or "username" not in result or "role" not in result:
+    if "uid" not in result or "username" not in result or "role" not in result:
         a.json({"test": "users_get_id", "status": "FAIL", "error": "Missing fields in result"})
         return
 
@@ -34,7 +34,7 @@ def action_test_users_get_id_not_found(a):
         a.json({"test": "users_get_id_not_found", "status": "SKIP", "reason": "Requires administrator role"})
         return
 
-    result = mochi.user.get(999999)
+    result = mochi.user.get("nonexistent-uid-xyz")
     if result != None:
         a.json({"test": "users_get_id_not_found", "status": "FAIL", "error": "Should return None for non-existent user"})
         return
@@ -92,7 +92,7 @@ def action_test_users_list(a):
 
     # Check first user has required fields
     user = users[0]
-    if "id" not in user or "username" not in user or "role" not in user:
+    if "uid" not in user or "username" not in user or "role" not in user:
         a.json({"test": "users_list", "status": "FAIL", "error": "User missing required fields"})
         return
 
@@ -168,30 +168,30 @@ def action_test_users_create_update_delete(a):
         a.json({"test": "users_create_update_delete", "status": "FAIL", "error": "Default role should be 'user'"})
         return
 
-    user_id = user["id"]
+    user_uid = user["uid"]
 
     # Update role
-    result = mochi.user.update(user_id, None, "administrator")
+    result = mochi.user.update(user_uid, None, "administrator")
     if result != True:
         a.json({"test": "users_create_update_delete", "status": "FAIL", "error": "update() did not return True"})
         return
 
     # Verify update
-    updated = mochi.user.get(user_id)
+    updated = mochi.user.get(user_uid)
     if updated["role"] != "administrator":
         a.json({"test": "users_create_update_delete", "status": "FAIL", "error": "Role not updated"})
         return
 
     # Update username
     new_email = "updated-" + mochi.random.alphanumeric(8) + "@example.com"
-    mochi.user.update(user_id, new_email, None)
-    updated = mochi.user.get(user_id)
+    mochi.user.update(user_uid, new_email, None)
+    updated = mochi.user.get(user_uid)
     if updated["username"] != new_email:
         a.json({"test": "users_create_update_delete", "status": "FAIL", "error": "Username not updated"})
         return
 
     # Delete user
-    result = mochi.user.delete(user_id)
+    result = mochi.user.delete(user_uid)
     if result != True:
         a.json({"test": "users_create_update_delete", "status": "FAIL", "error": "delete() did not return True"})
         return
@@ -215,12 +215,12 @@ def action_test_users_create_with_role(a):
     user = mochi.user.create(test_email, "administrator")
 
     if user["role"] != "administrator":
-        mochi.user.delete(user["id"])
+        mochi.user.delete(user["uid"])
         a.json({"test": "users_create_with_role", "status": "FAIL", "error": "Role should be 'administrator'"})
         return
 
     # Cleanup
-    mochi.user.delete(user["id"])
+    mochi.user.delete(user["uid"])
 
     a.json({"test": "users_create_with_role", "status": "PASS"})
 
@@ -249,7 +249,7 @@ def action_test_users_delete_self(a):
         return
 
     # Try to delete self - should fail
-    result = mochi.user.delete(me["id"])
+    result = mochi.user.delete(me["uid"])
     # Should have raised error
     a.json({"test": "users_delete_self", "status": "FAIL", "error": "Should not be able to delete self"})
 
@@ -416,11 +416,11 @@ def action_test_users_suite(a):
         user = mochi.user.create(test_email)
         created = user != None and user["username"] == test_email
         if created:
-            mochi.user.update(user["id"], None, "administrator")
-            updated = mochi.user.get(user["id"])
+            mochi.user.update(user["uid"], None, "administrator")
+            updated = mochi.user.get(user["uid"])
             role_updated = updated["role"] == "administrator"
-            mochi.user.delete(user["id"])
-            deleted = mochi.user.get(user["id"]) == None
+            mochi.user.delete(user["uid"])
+            deleted = mochi.user.get(user["uid"]) == None
             results.append({"test": "user_lifecycle", "pass": created and role_updated and deleted})
         else:
             results.append({"test": "user_lifecycle", "pass": False})

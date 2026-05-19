@@ -550,6 +550,16 @@ def action_test_file_replication_cleanup(a):
         mochi.file.delete("file_repl_test/" + size + ".bin")
     a.json({"cleaned": True})
 
+def action_test_file_upload(a):
+    """Upload via multipart form (field=file, path=<path>). Memory-
+    efficient streaming write + automatic replication via a.upload."""
+    path = a.input("path")
+    if not path:
+        a.error(400, "missing path")
+        return
+    a.upload("file", path)
+    a.json({"uploaded": path})
+
 def action_test_db_limit(a):
     """Test database storage limit by inserting data until full.
     Inserts 4KB rows. With 1GB limit (~262144 pages of 4KB), should fail around 250k rows."""
