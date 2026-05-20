@@ -9,6 +9,12 @@ def database_create():
 def database_upgrade(version):
     if version == 3:
         mochi.db.execute("create table if not exists test_excluded ( id text primary key, value text )")
+    if version == 4:
+        # Stage 16: add an extra column so an op emitted at schema 4
+        # can be tested against a receiver still at schema 3 (deferred
+        # until the receiver migrates and drains pending).
+        if not mochi.db.row("select 1 from pragma_table_info('test') where name = 'extra'"):
+            mochi.db.execute("alter table test add column extra text not null default ''")
 
 def action_index(a):
     """Show test app status and controls"""
@@ -91,6 +97,73 @@ def action_replication_excluded_write(a):
         return
     mochi.db.execute("insert into test_excluded (id, value) values (?, ?)", id, value)
     a.json({"ok": True, "id": id, "value": value})
+
+# Stage 14: Transactions — verify the deferred-emit-on-commit model.
+# Each entry point inserts a known id prefix so the cross-instance
+# inspector can scope its check, and avoids polluting the table for
+# unrelated tests.
+
+def action_replication_transaction_commit(a):
+    """Insert two rows in a single tx and commit. Both rows should
+    replicate to the other host."""
+    mochi.db.execute("delete from test where id like 'tx-commit-%'")
+    t = mochi.db.transaction()
+    t.execute("insert into test (id, value) values (?, ?)", "tx-commit-a", "A")
+    t.execute("insert into test (id, value) values (?, ?)", "tx-commit-b", "B")
+    t.commit()
+    rows = mochi.db.rows("select id, value from test where id like 'tx-commit-%' order by id")
+    a.json({"committed": True, "rows": rows})
+
+def action_replication_transaction_rollback(a):
+    """Insert in a tx then explicitly roll back. Nothing should
+    replicate to the other host."""
+    mochi.db.execute("delete from test where id like 'tx-rollback-%'")
+    t = mochi.db.transaction()
+    t.execute("insert into test (id, value) values (?, ?)", "tx-rollback-a", "A")
+    t.rollback()
+    rows = mochi.db.rows("select id, value from test where id like 'tx-rollback-%' order by id")
+    a.json({"committed": False, "rows": rows})
+
+def action_replication_transaction_fail(a):
+    """Insert row A, attempt an insert that violates the primary-key
+    constraint, let the resulting error propagate so the action
+    tear-down auto-rolls back the tx. Nothing should land locally or
+    replicate."""
+    mochi.db.execute("delete from test where id like 'tx-fail-%'")
+    t = mochi.db.transaction()
+    t.execute("insert into test (id, value) values (?, ?)", "tx-fail-a", "A")
+    # Same primary key: constraint violation propagates out of t.execute,
+    # so the action handler exits with an error and the tear-down rolls
+    # the transaction back. No commit() reached.
+    t.execute("insert into test (id, value) values (?, ?)", "tx-fail-a", "duplicate")
+    # Not reached.
+    a.json({"unreachable": True})
+
+def action_replication_transaction_inspect(a):
+    """Read back the tx-* rows so cross-instance checks can compare."""
+    rows = mochi.db.rows("select id, value from test where id like 'tx-%' order by id")
+    a.json({"rows": rows})
+
+# Stage 16: schema-bump defer/wake-up
+def action_replication_schema_write(a):
+    """Insert a row that uses the schema-4 'extra' column. Emitted at
+    schema 4; receivers still on schema 3 must defer until they
+    upgrade and drain pending."""
+    id = a.input("id")
+    value = a.input("value", "")
+    extra = a.input("extra", "")
+    if not id:
+        a.error(400, "missing id")
+        return
+    mochi.db.execute("insert into test (id, value, extra) values (?, ?, ?)", id, value, extra)
+    a.json({"ok": True, "id": id, "value": value, "extra": extra})
+
+def action_replication_schema_inspect(a):
+    """Read back schema-* rows for cross-instance checks. Returns
+    both columns so a receiver that's missing the 'extra' column
+    surfaces the gap as a SQL error rather than silently dropping it."""
+    rows = mochi.db.rows("select id, value, extra from test where id like 'schema-%' order by id")
+    a.json({"rows": rows})
 
 def action_ping(a):
     """Send a ping without authentication (accepts from parameter)"""

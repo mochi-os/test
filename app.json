@@ -32,7 +32,7 @@
 
 	"database": {
 		"file": "test.db",
-		"schema": 3,
+		"schema": 4,
 		"create": {"function": "database_create"},
 		"upgrade": {"function": "database_upgrade"},
 		"replicate": {
@@ -50,6 +50,12 @@
 		"replication/update": {"function": "action_replication_update"},
 		"replication/delete": {"function": "action_replication_delete"},
 		"replication/excluded/write": {"function": "action_replication_excluded_write"},
+		"replication/transaction/commit": {"function": "action_replication_transaction_commit"},
+		"replication/transaction/rollback": {"function": "action_replication_transaction_rollback"},
+		"replication/transaction/fail": {"function": "action_replication_transaction_fail"},
+		"replication/transaction/inspect": {"function": "action_replication_transaction_inspect"},
+		"replication/schema/write": {"function": "action_replication_schema_write"},
+		"replication/schema/inspect": {"function": "action_replication_schema_inspect"},
 		"ping": {"function": "action_ping", "public": true},
 		"broadcast": {"function": "action_broadcast"},
 		"test_broadcast": {"function": "action_test_broadcast", "public": true},
