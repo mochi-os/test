@@ -15,6 +15,13 @@ def database_upgrade(version):
         # until the receiver migrates and drains pending).
         if not mochi.db.row("select 1 from pragma_table_info('test') where name = 'extra'"):
             mochi.db.execute("alter table test add column extra text not null default ''")
+    if version == 5:
+        # Stage 20: a trivial bump so a test-app op emitted at schema 5
+        # defers on a receiver still at schema 4 — exercises per-DB
+        # stream independence (the deferred test stream must not stall
+        # other apps' streams).
+        if not mochi.db.row("select 1 from pragma_table_info('test') where name = 'note'"):
+            mochi.db.execute("alter table test add column note text not null default ''")
 
 def action_index(a):
     """Show test app status and controls"""
