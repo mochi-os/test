@@ -325,7 +325,6 @@ def action_test_leader(a):
     is_leader = mochi.schedule.leader(scope, key)
     a.json({"leader": is_leader, "scope": scope, "key": key})
 
-
 def action_test_attach(a):
     """Test that ATTACH is blocked - should fail with authorization error"""
     # This should fail with an authorization error if the security is working
