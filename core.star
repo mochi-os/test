@@ -302,6 +302,29 @@ def action_test_broadcast(a):
     mochi.message.publish(headers, content)
     a.json({"published": True, "message": msg})
 
+# --- Stage 34: mochi.broadcast.send sender-side validation ---
+
+def action_test_broadcast_send_bad_from(a):
+    """mochi.broadcast.send with a from not owned by the caller — expected to error (Starlark halts)."""
+    bad_from = "1FAKEENTITYxxxxxxxxxxxxxxxxxxx"
+    mochi.broadcast.send(bad_from, "stage34key", [], "test", "stage34/event", "{}", "")
+    a.json({"unexpected": "send should have errored on bad from"})
+
+def action_test_broadcast_send_good(a):
+    """Legitimate mochi.broadcast.send (from = caller's identity)."""
+    me = a.user.identity.id
+    mochi.broadcast.send(me, "stage34key", [], "test", "stage34/event", "{}", "")
+    a.json({"sent": True, "from": me})
+
+# --- Stage 22: mochi.schedule.leader cross-host election ---
+
+def action_test_leader(a):
+    """Calls mochi.schedule.leader(scope, key) and returns the result. Used for live cross-host election checks."""
+    scope = a.input("scope", "stage22")
+    key = a.input("key", "stage22key")
+    is_leader = mochi.schedule.leader(scope, key)
+    a.json({"leader": is_leader, "scope": scope, "key": key})
+
 def action_test_attach(a):
     """Test that ATTACH is blocked - should fail with authorization error"""
     # This should fail with an authorization error if the security is working
