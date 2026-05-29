@@ -316,6 +316,32 @@ def action_test_broadcast_send_good(a):
     mochi.broadcast.send(me, "stage34key", [], "test", "stage34/event", "{}", "")
     a.json({"sent": True, "from": me})
 
+# --- Stage 165: mochi.broadcast.seen / touch (idle-resync gate) ---
+
+def action_test_broadcast_seen(a):
+    """Exercise mochi.broadcast.seen / touch from real Starlark — the idle-resync
+    (#165) gate primitives. A never-seen key reads 0 (stale); touch stamps seen=now
+    (migrating/creating the received table); a freshly-touched key is not idle."""
+    key = "stage165_" + mochi.uid()
+    idle_age = 7 * 86400
+
+    before = mochi.broadcast.seen(key)              # never touched -> 0
+    stale_is_idle = (mochi.time.now() - before) > idle_age   # 0 -> very stale -> True
+
+    t0 = mochi.time.now()
+    mochi.broadcast.touch(key)                       # stamp seen=now (+ migrate table)
+    after = mochi.broadcast.seen(key)                # ~now
+    fresh_is_idle = (mochi.time.now() - after) > idle_age    # just touched -> False
+
+    a.json({
+        "before": before,
+        "after": after,
+        "stamped_recent": after >= t0,
+        "stale_is_idle": stale_is_idle,
+        "fresh_is_idle": fresh_is_idle,
+        "pass": before == 0 and after >= t0 and stale_is_idle and not fresh_is_idle,
+    })
+
 # --- Stage 22: mochi.schedule.leader cross-host election ---
 
 def action_test_leader(a):
