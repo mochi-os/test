@@ -263,45 +263,6 @@ def action_test_services_header(a):
 
     a.json({"passed": passed, "results": results})
 
-def action_broadcast(a):
-    """Publish a broadcast message to all peers"""
-    msg = a.input("msg", "hello")
-
-    headers = {
-        "from": a.user.identity.id,
-        "service": "claude-test",
-        "event": "broadcast"
-    }
-    content = {
-        "message": msg,
-        "time": mochi.time.now()
-    }
-
-    mochi.message.publish(headers, content)
-    a.json({"published": True, "from": a.user.identity.id, "message": msg})
-
-def event_broadcast(e):
-    """Handle incoming broadcast event"""
-    print("Claude Test: Received broadcast from", e.header("from"), "message:", e.content("message"))
-
-def action_test_broadcast(a):
-    """Test broadcast without authentication"""
-    msg = a.input("msg", "test_broadcast")
-
-    headers = {
-        "from": "",
-        "service": "claude-test",
-        "event": "broadcast"
-    }
-    content = {
-        "message": msg,
-        "time": mochi.time.now(),
-        "number": 42
-    }
-
-    mochi.message.publish(headers, content)
-    a.json({"published": True, "message": msg})
-
 # --- Stage 34: mochi.broadcast.send sender-side validation ---
 
 def action_test_broadcast_send_bad_from(a):

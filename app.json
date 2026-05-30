@@ -57,8 +57,6 @@
 		"replication/schema/write": {"function": "action_replication_schema_write"},
 		"replication/schema/inspect": {"function": "action_replication_schema_inspect"},
 		"ping": {"function": "action_ping", "public": true},
-		"broadcast": {"function": "action_broadcast"},
-		"test_broadcast": {"function": "action_test_broadcast", "public": true},
 		"broadcast_send/bad_from": {"function": "action_test_broadcast_send_bad_from"},
 		"broadcast_send/good": {"function": "action_test_broadcast_send_good"},
 		"broadcast_seen": {"function": "action_test_broadcast_seen"},
@@ -278,7 +276,6 @@
 	"events": {
 		"ping": {"function": "event_ping"},
 		"pong": {"function": "event_pong"},
-		"broadcast": {"function": "event_broadcast"},
 		"appfile_stream": {"function": "event_appfile_stream"},
 		"services_check": {"function": "event_services_check"}
 	}
