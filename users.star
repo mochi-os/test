@@ -197,7 +197,7 @@ def action_test_users_create_update_delete(a):
         return
 
     # Verify deletion
-    deleted = mochi.user.get(user_id)
+    deleted = mochi.user.get(user_uid)
     if deleted != None:
         a.json({"test": "users_create_update_delete", "status": "FAIL", "error": "User still exists after delete"})
         return
