@@ -90,6 +90,7 @@
 		"test_groups_nested": {"function": "action_test_groups_nested", "public": true},
 		"test_groups_cycle": {"function": "action_test_groups_cycle", "public": true},
 		"test_access_basic": {"function": "action_test_access_basic", "public": true},
+		"access_lww": {"function": "action_access_lww", "public": true},
 		"test_access_wildcards": {"function": "action_test_access_wildcards", "public": true},
 		"test_access_hierarchy": {"function": "action_test_access_hierarchy", "public": true},
 		"test_access_anonymous": {"function": "action_test_access_anonymous", "public": true},

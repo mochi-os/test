@@ -6,6 +6,23 @@
 # Mochi Claude Test app: Access Control API Tests
 # Test access control: allow, deny, check, wildcards, hierarchy, groups
 
+# Rig test helper: write one access rule (allow/deny/revoke) for a given
+# subject/resource/operation, so the access table can be inspected and its
+# cross-host replication + convergence verified.
+def action_access_lww(a):
+    subject = a.input("subject", "")
+    resource = a.input("resource", "")
+    operation = a.input("operation", "read")
+    op = a.input("op", "")
+    if op == "allow":
+        mochi.access.allow(subject, resource, operation, "rigtest")
+    elif op == "deny":
+        mochi.access.deny(subject, resource, operation, "rigtest")
+    elif op == "revoke":
+        mochi.access.revoke(subject, resource, operation)
+    a.json({"ok": True, "op": op})
+
+
 def action_test_access_basic(a):
     """Test basic access control: allow, deny, check, revoke"""
     results = []
