@@ -43,7 +43,7 @@ def action_test_ai_prompt(a):
     """Test mochi.ai.prompt"""
     account = a.input("account")
     if account != None:
-        result = mochi.ai.prompt("Reply with exactly one word: hello", account=int(account))
+        result = mochi.ai.prompt("Reply with exactly one word: hello", account=account)
     else:
         result = mochi.ai.prompt("Reply with exactly one word: hello")
     a.json({
