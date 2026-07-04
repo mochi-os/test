@@ -37,10 +37,7 @@
 		"file": "test.db",
 		"schema": 5,
 		"create": {"function": "database_create"},
-		"upgrade": {"function": "database_upgrade"},
-		"replicate": {
-			"exclude": {"tables": ["test_excluded"]}
-		}
+		"upgrade": {"function": "database_upgrade"}
 	},
 
 	"actions": {
