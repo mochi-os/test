@@ -10,23 +10,6 @@ def database_create():
     """Create test database schema"""
     mochi.db.execute("create table test ( id text primary key, value text )")
 
-def database_upgrade(version):
-    if version == 3:
-        pass
-    if version == 4:
-        # Stage 16: add an extra column so an op emitted at schema 4
-        # can be tested against a receiver still at schema 3 (deferred
-        # until the receiver migrates and drains pending).
-        if not mochi.db.row("select 1 from pragma_table_info('test') where name = 'extra'"):
-            mochi.db.execute("alter table test add column extra text not null default ''")
-    if version == 5:
-        # Stage 20: a trivial bump so a test-app op emitted at schema 5
-        # defers on a receiver still at schema 4 — exercises per-DB
-        # stream independence (the deferred test stream must not stall
-        # other apps' streams).
-        if not mochi.db.row("select 1 from pragma_table_info('test') where name = 'note'"):
-            mochi.db.execute("alter table test add column note text not null default ''")
-
 def action_index(a):
     """Show test app status and controls"""
     identity = a.user.identity

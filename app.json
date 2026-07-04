@@ -35,9 +35,8 @@
 
 	"database": {
 		"file": "test.db",
-		"schema": 5,
+		"schema": 1,
 		"create": {"function": "database_create"},
-		"upgrade": {"function": "database_upgrade"}
 	},
 
 	"actions": {
