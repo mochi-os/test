@@ -260,6 +260,12 @@ def action_test_apis_suite(a):
 	results.append({"test": "text_slug_basic", "pass": mochi.text.slug("Hello, World!") == "hello-world"})
 	results.append({"test": "text_slug_accents", "pass": mochi.text.slug("Café Olé") == "cafe-ole"})
 	results.append({"test": "text_slug_empty", "pass": mochi.text.slug("---") == ""})
+	results.append({"test": "encode_base64_string", "pass": mochi.encode.base64("abc") == "YWJj"})
+	results.append({"test": "encode_base64_bytes", "pass": mochi.encode.base64(bytes("abc")) == "YWJj"})
+	results.append({"test": "encode_base64_empty", "pass": mochi.encode.base64("") == ""})
+	results.append({"test": "decode_base64_round_trip", "pass": mochi.decode.base64(mochi.encode.base64("hello world")) == bytes("hello world")})
+	results.append({"test": "decode_base64_bytes_type", "pass": type(mochi.decode.base64("YWJj")) == "bytes"})
+	results.append({"test": "decode_base64_invalid", "pass": mochi.decode.base64("not!valid!") == None})
 
 	passed = len([r for r in results if r["pass"]])
 	a.json({"passed": passed, "total": len(results), "results": results})
