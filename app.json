@@ -5,7 +5,7 @@
 // Mochi Application Interface Exception - see license.txt and license-exception.md.
 
 {
-	"version": "1.4",
+	"version": "1.5",
 	"label": "app.name",
 	"classes": ["test"],
 	"paths": ["test"],
@@ -252,6 +252,7 @@
 		"test_server_started": {"function": "action_test_server_started", "public": true},
 		"test_server_uptime": {"function": "action_test_server_uptime", "public": true},
 		"test_server_version": {"function": "action_test_server_version", "public": true},
+		"test_service_permission": {"function": "action_test_service_permission"},
 		"test_service_exists_true": {"function": "action_test_service_exists_true", "public": true},
 		"test_service_exists_false": {"function": "action_test_service_exists_false", "public": true},
 		"test_permission_level": {"function": "action_test_permission_level", "public": true},

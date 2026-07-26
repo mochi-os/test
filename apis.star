@@ -156,6 +156,24 @@ def action_test_service_exists_false(a):
 	got = mochi.service.exists("nonexistent-service-xyz-12345")
 	a.json({"pass": got == False, "got": got})
 
+# mochi.service.call permission gate.
+#
+# This app is in apps_default WITHOUT the repositories permissions, so it is a
+# caller that legitimately holds no grant. Calling a gated function raises and
+# aborts the action, which the caller sees as a 500 carrying the permission
+# message - that abort IS the assertion. The function name arrives as input so
+# one action can probe every entry in another app's service table; parameters
+# are deliberately omitted because api_service_call checks the permission
+# before it ever calls the handler, so a permission refusal is distinguishable
+# from a handler complaining about missing arguments.
+def action_test_service_permission(a):
+	service = a.input("service")
+	function = a.input("function")
+	if not service or not function:
+		return a.error(400, "service and function are required")
+	result = mochi.service.call(service, function)
+	a.json({"called": True, "result": result})
+
 # mochi.permission.level - returns string
 
 def action_test_permission_level(a):
