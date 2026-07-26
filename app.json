@@ -5,7 +5,7 @@
 // Mochi Application Interface Exception - see license.txt and license-exception.md.
 
 {
-	"version": "1.2",
+	"version": "1.4",
 	"label": "app.name",
 	"classes": ["test"],
 	"paths": ["test"],
@@ -22,6 +22,7 @@
 		"attachments_multiuser.star",
 		"attachments_crossinstance.star",
 		"attachments_url.star",
+		"attachment_authz_probe.star",
 		"preferences.star",
 		"settings.star",
 		"users.star",
@@ -102,6 +103,10 @@
 		"test_attachment_clear": {"function": "action_test_attachment_clear", "public": true},
 		"test_attachment_get_data_path": {"function": "action_test_attachment_get_data_path", "public": true},
 		"test_attachment_list": {"function": "action_test_attachment_list", "public": true},
+		"probe_attachment_seed": {"function": "action_probe_attachment_seed", "public": true},
+		"probe_attachment_attack": {"function": "action_probe_attachment_attack", "public": true},
+		"probe_attachment_plant": {"function": "action_probe_attachment_plant", "public": true},
+		"probe_attachment_check": {"function": "action_probe_attachment_check", "public": true},
 		"test_attachment_crud": {"function": "action_test_attachment_crud", "public": true},
 		"test_attachment_binary": {"function": "action_test_attachment_binary", "public": true},
 		"test_attachment_content_types": {"function": "action_test_attachment_content_types", "public": true},
