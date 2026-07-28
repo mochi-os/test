@@ -23,6 +23,25 @@ def action_test_notifications_gate_manage(a):
     result = mochi.service.call("notifications", "topic/list")
     a.json({"test": "notifications_gate_manage", "denied": False, "rows": len(result or [])})
 
+def action_test_notifications_emit(a):
+    """Send a real notification through the routing pipeline and leave it in
+    place; the RSS routing tests assert which feeds carry it. The topic row
+    is created lazily with the user's default category."""
+    topic = a.input("topic", "probe")
+    object = a.input("object", "rss-probe")
+    title = a.input("title", "RSS probe")
+    body = a.input("body", "rss-routing-probe-body")
+    sent = mochi.service.call("notifications", "send", topic, object, title, body, "", "Test probe")
+    a.json({"sent": sent})
+
+def action_test_notifications_cleanup(a):
+    """Remove the emitted probe notification and its topic row."""
+    topic = a.input("topic", "probe")
+    object = a.input("object", "rss-probe")
+    cleared = mochi.service.call("notifications", "clear/object", object)
+    removed = mochi.service.call("notifications", "topic/remove", topic, object)
+    a.json({"cleared": cleared, "removed": removed})
+
 def action_test_notifications_send_clear(a):
     """Must SUCCEED: send stays ungated (context-stamped app id), and
     clear/object takes only the object, scoped to the calling app."""
