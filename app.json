@@ -5,7 +5,7 @@
 // Mochi Application Interface Exception - see license.txt and license-exception.md.
 
 {
-	"version": "1.6",
+	"version": "1.7",
 	"label": "app.name",
 	"classes": ["test"],
 	"paths": ["test"],
@@ -32,7 +32,8 @@
 		"entities.star",
 		"stage5.star",
 		"apis.star",
-		"unifiedpush.star"
+		"unifiedpush.star",
+		"notifications.star"
 	],
 
 	"database": {
@@ -73,6 +74,9 @@
 		"test_unifiedpush_register_local": {"function": "action_test_unifiedpush_register_local", "public": true},
 		"test_unifiedpush_register_foreign": {"function": "action_test_unifiedpush_register_foreign", "public": true},
 		"test_unifiedpush_register_validation": {"function": "action_test_unifiedpush_register_validation", "public": true},
+		"test_notifications_gate_read": {"function": "action_test_notifications_gate_read", "public": true},
+		"test_notifications_gate_manage": {"function": "action_test_notifications_gate_manage", "public": true},
+		"test_notifications_send_clear": {"function": "action_test_notifications_send_clear", "public": true},
 		"test_groups_crud": {"function": "action_test_groups_crud", "public": true},
 		"test_groups_members": {"function": "action_test_groups_members", "public": true},
 		"test_groups_nested": {"function": "action_test_groups_nested", "public": true},
