@@ -28,7 +28,7 @@ def action_test_unifiedpush_register_local(a):
 
     results.append({
         "test": "register_returns_data",
-        "passed": result != None and result.get("id", 0) > 0,
+        "passed": result != None and bool(result.get("id")),
     })
 
     if result and result.get("id"):
@@ -70,7 +70,7 @@ def action_test_unifiedpush_register_foreign(a):
 
     results.append({
         "test": "register_returns_data",
-        "passed": result != None and result.get("id", 0) > 0,
+        "passed": result != None and bool(result.get("id")),
     })
 
     if result and result.get("id"):
