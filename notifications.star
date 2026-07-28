@@ -31,7 +31,8 @@ def action_test_notifications_emit(a):
     object = a.input("object", "rss-probe")
     title = a.input("title", "RSS probe")
     body = a.input("body", "rss-routing-probe-body")
-    sent = mochi.service.call("notifications", "send", topic, object, title, body, "", "Test probe")
+    event = a.input("event", "")
+    sent = mochi.service.call("notifications", "send", topic, object, title, body, "", "Test probe", event_id=event)
     a.json({"sent": sent})
 
 def action_test_notifications_cleanup(a):
